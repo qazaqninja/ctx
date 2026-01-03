@@ -1,0 +1,7 @@
+structure:
+  value: modular
+  confidence: uncertain
+  evidence:
+    - "Average path depth: 2.9"
+boundaries: []
+patterns: {}

@@ -1,0 +1,6 @@
+name: ctx
+language:
+  value: typescript
+  confidence: observed
+generated_at: 2026-01-03T21:27:32.350Z
+ctx_version: 0.1.0

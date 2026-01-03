@@ -1,0 +1,12 @@
+naming:
+  files:
+    value: mixed
+    confidence: observed
+    evidence:
+      - 100% of files use mixed
+  functions:
+    value: camelCase
+    confidence: inferred
+  classes:
+    value: PascalCase
+    confidence: inferred

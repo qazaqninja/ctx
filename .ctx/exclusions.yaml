@@ -1,0 +1,15 @@
+paths:
+  - node_modules
+  - dist
+  - build
+  - .git
+  - "*.test.ts"
+  - "*.spec.ts"
+  - __mocks__
+  - __tests__
+  - coverage
+  - .next
+  - .nuxt
+ignore_patterns:
+  - generated files
+  - vendored code

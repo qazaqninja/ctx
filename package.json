@@ -1,0 +1,33 @@
+{
+  "name": "ctx",
+  "version": "0.1.0",
+  "description": "Extract coding patterns from codebases and synthesize them into AI-injectable context",
+  "main": "dist/index.js",
+  "bin": {
+    "ctx": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "keywords": [
+    "cli",
+    "context",
+    "ai",
+    "patterns",
+    "conventions"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "fast-glob": "^3.3.2",
+    "ignore": "^5.3.1",
+    "yaml": "^2.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  }
+}
