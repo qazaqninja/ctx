@@ -20,6 +20,8 @@ program
 program
   .command('scan')
   .description('Analyze codebase and detect patterns')
+  .option('--local-ai', 'Enable local AI analysis via Ollama')
+  .option('--model <model>', 'Ollama model to use (required with --local-ai)')
   .action(scan);
 
 program

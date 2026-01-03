@@ -3,7 +3,24 @@ import path from 'path';
 import YAML from 'yaml';
 import type { Manifest, Conventions, Architecture, FullContext, Finding } from '../types/schema.js';
 
-export async function loadContext(ctxPath: string): Promise<FullContext> {
+export interface AIConstraints {
+  architecture_rules: string[];
+  conventions: string[];
+  constraints: string[];
+  uncertain: string[];
+}
+
+export interface ExtendedContext extends FullContext {
+  aiConstraints?: AIConstraints;
+  semanticPatterns?: Array<{
+    name: string;
+    description: string;
+    confidence: string;
+    files: string[];
+  }>;
+}
+
+export async function loadContext(ctxPath: string): Promise<ExtendedContext> {
   const readYaml = <T>(name: string): T => {
     const filePath = path.join(ctxPath, name);
     if (!fs.existsSync(filePath)) {
@@ -12,11 +29,23 @@ export async function loadContext(ctxPath: string): Promise<FullContext> {
     return YAML.parse(fs.readFileSync(filePath, 'utf-8')) as T;
   };
 
+  const readOptionalYaml = <T>(name: string): T | undefined => {
+    const filePath = path.join(ctxPath, name);
+    if (!fs.existsSync(filePath)) {
+      return undefined;
+    }
+    return YAML.parse(fs.readFileSync(filePath, 'utf-8')) as T;
+  };
+
+  const architecture = readYaml<Architecture & { semantic_patterns?: unknown[] }>('architecture.yaml');
+
   return {
     manifest: readYaml<Manifest>('manifest.yaml'),
     conventions: readYaml<Conventions>('conventions.yaml'),
-    architecture: readYaml<Architecture>('architecture.yaml'),
+    architecture,
     exclusions: readYaml<{ paths: string[] }>('exclusions.yaml'),
+    aiConstraints: readOptionalYaml<AIConstraints>('constraints.yaml'),
+    semanticPatterns: architecture.semantic_patterns as ExtendedContext['semanticPatterns'],
   };
 }
 
@@ -118,4 +147,35 @@ export function explainUncertain(context: FullContext): string {
 
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+export function explainSemanticPatterns(patterns: ExtendedContext['semanticPatterns']): string {
+  if (!patterns || patterns.length === 0) return '';
+
+  const lines: string[] = [];
+  for (const p of patterns) {
+    lines.push(`- ${p.name}: ${p.description} (${p.confidence})`);
+  }
+  return lines.join('\n');
+}
+
+export function explainAIConstraints(constraints: AIConstraints): string {
+  const lines: string[] = [];
+
+  if (constraints.architecture_rules.length > 0) {
+    lines.push('Architecture rules:');
+    constraints.architecture_rules.forEach(r => lines.push(`  ✓ ${r}`));
+  }
+
+  if (constraints.constraints.length > 0) {
+    lines.push('Constraints (what NOT to do):');
+    constraints.constraints.forEach(c => lines.push(`  ✗ ${c}`));
+  }
+
+  if (constraints.uncertain.length > 0) {
+    lines.push('Needs confirmation:');
+    constraints.uncertain.forEach(u => lines.push(`  ? ${u}`));
+  }
+
+  return lines.join('\n');
 }

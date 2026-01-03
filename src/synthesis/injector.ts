@@ -1,7 +1,7 @@
 import type { FullContext } from '../types/schema.js';
-import { explainArchitecture, explainConventions } from './explainer.js';
+import { explainArchitecture, explainConventions, type ExtendedContext, type AIConstraints } from './explainer.js';
 
-export function formatForAI(context: FullContext, task?: string): string {
+export function formatForAI(context: ExtendedContext, task?: string): string {
   const sections: string[] = [];
 
   sections.push('## Context for AI\n');
@@ -23,6 +23,14 @@ export function formatForAI(context: FullContext, task?: string): string {
   sections.push('\n### Architecture\n');
   sections.push(explainArchitecture(context.architecture));
 
+  // Include semantic patterns if available
+  if (context.semanticPatterns && context.semanticPatterns.length > 0) {
+    sections.push('\nSemantic patterns:');
+    context.semanticPatterns.slice(0, 5).forEach(p => {
+      sections.push(`- ${p.name}: ${p.description}`);
+    });
+  }
+
   const conventions = explainConventions(context.conventions);
   if (conventions) {
     sections.push('\n### Conventions\n');
@@ -30,9 +38,23 @@ export function formatForAI(context: FullContext, task?: string): string {
   }
 
   sections.push('\n### Constraints\n');
-  sections.push('- Follow existing patterns in the codebase');
-  sections.push('- No new dependencies without explicit approval');
-  sections.push('- Match naming conventions');
+
+  // Use AI-generated constraints if available
+  if (context.aiConstraints) {
+    if (context.aiConstraints.architecture_rules.length > 0) {
+      sections.push('Architecture rules:');
+      context.aiConstraints.architecture_rules.forEach(r => sections.push(`- ${r}`));
+    }
+    if (context.aiConstraints.constraints.length > 0) {
+      sections.push('\nDo NOT:');
+      context.aiConstraints.constraints.forEach(c => sections.push(`- ${c}`));
+    }
+  } else {
+    // Fallback to generic constraints
+    sections.push('- Follow existing patterns in the codebase');
+    sections.push('- No new dependencies without explicit approval');
+    sections.push('- Match naming conventions');
+  }
 
   if (context.architecture.boundaries && context.architecture.boundaries.length > 0) {
     const example = context.architecture.boundaries[0];
