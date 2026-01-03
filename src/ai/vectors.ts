@@ -168,16 +168,17 @@ export function autoCluster(chunks: EmbeddedChunk[], maxK: number = 10): Cluster
   return clusterChunks(chunks, k);
 }
 
-// Label clusters based on common patterns in chunk names
+// Label clusters based on common patterns in chunk names and file paths
 export function labelClusters(clusters: Cluster[]): Cluster[] {
   return clusters.map(cluster => {
     const names = cluster.chunks.map(c => c.name);
+    const files = cluster.chunks.map(c => c.file);
     const types = cluster.chunks.map(c => c.type);
 
-    // Find common suffix patterns
+    // Find common suffix patterns in names
     const suffixes: Record<string, number> = {};
     for (const name of names) {
-      const matches = name.match(/(Service|Repository|Controller|Handler|Middleware|Utils?|Helper|Manager|Factory|Provider)$/i);
+      const matches = name.match(/(Service|Repository|Controller|Handler|Middleware|Utils?|Helper|Manager|Factory|Provider|Validator|Parser|Builder|Resolver)$/i);
       if (matches) {
         const suffix = matches[1].toLowerCase();
         suffixes[suffix] = (suffixes[suffix] || 0) + 1;
@@ -194,16 +195,58 @@ export function labelClusters(clusters: Cluster[]): Cluster[] {
       }
     }
 
-    // Fallback to type-based label
+    // Try to identify by directory patterns
+    if (!label) {
+      const dirPatterns: Record<string, number> = {};
+      for (const file of files) {
+        const parts = file.split('/');
+        for (const part of parts) {
+          // Common directory names
+          if (['test', 'tests', '__tests__', 'spec', 'fixtures'].includes(part.toLowerCase())) {
+            dirPatterns['test fixtures'] = (dirPatterns['test fixtures'] || 0) + 1;
+          } else if (['cli', 'commands', 'cmd'].includes(part.toLowerCase())) {
+            dirPatterns['CLI commands'] = (dirPatterns['CLI commands'] || 0) + 1;
+          } else if (['routes', 'api', 'endpoints'].includes(part.toLowerCase())) {
+            dirPatterns['API routes'] = (dirPatterns['API routes'] || 0) + 1;
+          } else if (['models', 'entities', 'domain'].includes(part.toLowerCase())) {
+            dirPatterns['domain models'] = (dirPatterns['domain models'] || 0) + 1;
+          } else if (['utils', 'helpers', 'shared'].includes(part.toLowerCase())) {
+            dirPatterns['utility functions'] = (dirPatterns['utility functions'] || 0) + 1;
+          }
+        }
+      }
+
+      const bestDir = Object.entries(dirPatterns).sort((a, b) => b[1] - a[1])[0];
+      if (bestDir && bestDir[1] >= cluster.chunks.length * 0.4) {
+        label = bestDir[0];
+      }
+    }
+
+    // Try function naming patterns
+    if (!label) {
+      const prefixes: Record<string, number> = {};
+      for (const name of names) {
+        const match = name.match(/^(get|set|create|update|delete|find|fetch|handle|process|validate|parse|build|render|on)/i);
+        if (match) {
+          prefixes[match[1].toLowerCase()] = (prefixes[match[1].toLowerCase()] || 0) + 1;
+        }
+      }
+
+      const bestPrefix = Object.entries(prefixes).sort((a, b) => b[1] - a[1])[0];
+      if (bestPrefix && bestPrefix[1] >= cluster.chunks.length * 0.4) {
+        label = `${bestPrefix[0]}* methods`;
+      }
+    }
+
+    // Final fallback: describe by type and count
     if (!label) {
       const typeCount: Record<string, number> = {};
       for (const type of types) {
         typeCount[type] = (typeCount[type] || 0) + 1;
       }
-      const dominantType = Object.entries(typeCount)
-        .sort((a, b) => b[1] - a[1])[0];
-      if (dominantType && dominantType[1] >= cluster.chunks.length * 0.5) {
-        label = `${dominantType[0]} cluster`;
+      const dominantType = Object.entries(typeCount).sort((a, b) => b[1] - a[1])[0];
+      if (dominantType) {
+        label = `${cluster.chunks.length} similar ${dominantType[0]}s`;
       }
     }
 

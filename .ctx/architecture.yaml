@@ -5,3 +5,8 @@ structure:
     - "Average path depth: 2.9"
 boundaries: []
 patterns: {}
+isMonorepo:
+  value: false
+  confidence: uncertain
+  evidence:
+    - No monorepo indicators found

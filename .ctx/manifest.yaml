@@ -2,5 +2,7 @@ name: ctx
 language:
   value: typescript
   confidence: observed
-generated_at: 2026-01-03T21:27:32.350Z
+  evidence:
+    - 17 TypeScript files found
+generated_at: 2026-01-03T22:29:56.824Z
 ctx_version: 0.1.0

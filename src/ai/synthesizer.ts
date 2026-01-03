@@ -1,4 +1,3 @@
-import YAML from 'yaml';
 import { generate } from './ollama.js';
 import type { AnalysisResult, SemanticPattern } from './analyzer.js';
 
@@ -10,79 +9,68 @@ export interface SynthesizedConstraints {
 }
 
 function buildPrompt(analysis: AnalysisResult, codebaseInfo: string): string {
-  const patternDescriptions = [
-    ...analysis.patterns.map(p => `- ${p.name}: ${p.description} (${p.confidence})`),
-    ...analysis.crossFilePatterns.map(p => `- Cross-file ${p.name}: ${p.description}`),
-  ];
+  // Build pattern summary - focus on high-confidence patterns
+  const strongPatterns = analysis.patterns
+    .filter(p => p.confidence === 'observed')
+    .slice(0, 5);
 
-  const anomalyInfo = analysis.anomalies.length > 0
-    ? `\nAnomalies (code that doesn't fit patterns): ${analysis.anomalies.length} chunks`
+  const patternSummary = strongPatterns.length > 0
+    ? strongPatterns.map(p => `- ${p.name} (${p.files.slice(0, 2).join(', ')})`).join('\n')
+    : '- No strong patterns detected';
+
+  const crossFileInfo = analysis.crossFilePatterns.length > 0
+    ? analysis.crossFilePatterns.slice(0, 3).map(p => `- ${p.name}`).join('\n')
     : '';
 
-  return `You are analyzing a codebase to extract development rules and constraints.
+  // Use a simpler, more direct prompt with few-shot example
+  return `Analyze this codebase and list the coding rules developers must follow.
 
-CODEBASE INFO:
-${codebaseInfo}
+Project: ${codebaseInfo}
 
-DETECTED PATTERNS:
-${patternDescriptions.join('\n')}
-${anomalyInfo}
+Detected patterns:
+${patternSummary}
+${crossFileInfo ? `\nCross-file patterns:\n${crossFileInfo}` : ''}
 
-Based on these patterns, generate:
+Based on these patterns, complete the lists below. Be specific and actionable.
 
-1. ARCHITECTURE RULES - What structural patterns MUST be followed
-2. CONVENTIONS - Naming, organization, and style conventions
-3. CONSTRAINTS - What NOT to do (anti-patterns to avoid)
-4. UNCERTAIN - Areas that need human confirmation
+ARCHITECTURE_RULES (structural patterns to follow):
+- Use the controller pattern for API endpoints
+- ${strongPatterns[0]?.name ? `Follow the ${strongPatterns[0].name} consistently` : 'Keep related code together'}
 
-Output ONLY valid YAML in this exact format:
+CONVENTIONS (naming and style):
+-
 
-\`\`\`yaml
-architecture_rules:
-  - "Rule 1"
-  - "Rule 2"
-conventions:
-  - "Convention 1"
-constraints:
-  - "Constraint 1"
-uncertain:
-  - "Question 1"
-\`\`\`
+CONSTRAINTS (what NOT to do):
+- Do not bypass the established patterns
+-
 
-Be specific and actionable. Reference the detected patterns.`;
+UNCERTAIN (needs human review):
+- `;
 }
 
-function parseYamlResponse(response: string): SynthesizedConstraints {
-  // Extract YAML block from response
-  const yamlMatch = response.match(/```yaml\n?([\s\S]*?)```/);
-  const yamlContent = yamlMatch ? yamlMatch[1] : response;
+function parseResponse(response: string): SynthesizedConstraints {
+  // Extract lists from completion-style response
+  const extractSection = (header: string): string[] => {
+    // Match section header and capture everything until next section or end
+    const pattern = new RegExp(
+      `${header}[^:]*:\\s*([\\s\\S]*?)(?=(?:ARCHITECTURE_RULES|CONVENTIONS|CONSTRAINTS|UNCERTAIN)[^:]*:|$)`,
+      'i'
+    );
+    const match = response.match(pattern);
+    if (!match) return [];
 
-  try {
-    const parsed = YAML.parse(yamlContent);
-    return {
-      architectureRules: Array.isArray(parsed.architecture_rules) ? parsed.architecture_rules : [],
-      conventions: Array.isArray(parsed.conventions) ? parsed.conventions : [],
-      constraints: Array.isArray(parsed.constraints) ? parsed.constraints : [],
-      uncertainAreas: Array.isArray(parsed.uncertain) ? parsed.uncertain : [],
-    };
-  } catch {
-    // Fallback: try to extract lists manually
-    const extractList = (pattern: RegExp): string[] => {
-      const matches = response.match(pattern);
-      if (!matches) return [];
-      return matches[1]
-        .split('\n')
-        .map(line => line.replace(/^[\s-]*["']?|["']?$/g, '').trim())
-        .filter(line => line.length > 0);
-    };
+    return match[1]
+      .split('\n')
+      .map(line => line.replace(/^[\s\-*\d.]+/, '').trim())  // Strip whitespace, dashes, asterisks, numbers
+      .filter(line => line.length > 0 && !line.startsWith('('));
+  };
 
-    return {
-      architectureRules: extractList(/architecture_rules:\s*((?:\n\s*-[^\n]+)+)/),
-      conventions: extractList(/conventions:\s*((?:\n\s*-[^\n]+)+)/),
-      constraints: extractList(/constraints:\s*((?:\n\s*-[^\n]+)+)/),
-      uncertainAreas: extractList(/uncertain:\s*((?:\n\s*-[^\n]+)+)/),
-    };
-  }
+  return {
+    architectureRules: extractSection('ARCHITECTURE_RULES'),
+    conventions: extractSection('CONVENTIONS'),
+    constraints: extractSection('CONSTRAINTS'),
+    uncertainAreas: extractSection('UNCERTAIN'),
+  };
 }
 
 export async function synthesizeConstraints(
@@ -98,7 +86,7 @@ export async function synthesizeConstraints(
       maxTokens: 2000,
     });
 
-    return parseYamlResponse(response);
+    return parseResponse(response);
   } catch (err) {
     console.error(`Synthesis failed: ${err}`);
     // Return empty constraints on failure
