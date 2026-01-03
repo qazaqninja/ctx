@@ -23,6 +23,10 @@ export async function loadContext(ctxPath: string): Promise<FullContext> {
 export function explainArchitecture(arch: Architecture): string {
   const lines: string[] = [];
 
+  if (arch.isMonorepo?.value) {
+    lines.push(`- Monorepo structure (${arch.isMonorepo.evidence?.join(', ') || 'multiple packages'})`);
+  }
+
   if (arch.structure?.value) {
     const patterns: Record<string, string> = {
       'vertical-features': 'Vertical feature folders (domain-driven organization)',
@@ -71,6 +75,15 @@ export function explainConventions(conv: Conventions): string {
     }
     if (parts.length > 0) {
       lines.push(`- Formatting: ${parts.join(', ')}`);
+    }
+  }
+
+  if (conv.imports) {
+    const parts: string[] = [];
+    if (conv.imports.style?.value) parts.push(`${conv.imports.style.value} imports`);
+    if (conv.imports.nodePrefix?.value) parts.push('node: prefix for builtins');
+    if (parts.length > 0) {
+      lines.push(`- Imports: ${parts.join(', ')}`);
     }
   }
 

@@ -13,6 +13,7 @@ export interface Manifest {
   description?: string;
   generated_at: string;
   ctx_version: string;
+  isMonorepo?: Finding<boolean>;
 }
 
 export interface NamingConventions {
@@ -30,6 +31,7 @@ export interface FormattingConventions {
 export interface ImportConventions {
   style?: Finding<string>;
   order?: Finding<string[]>;
+  nodePrefix?: Finding<boolean>;
 }
 
 export interface Conventions {
@@ -60,6 +62,7 @@ export interface Architecture {
     dependency_injection?: Finding<string>;
   };
   data_flow?: Finding<string>;
+  isMonorepo?: Finding<boolean>;
 }
 
 export interface Exclusions {

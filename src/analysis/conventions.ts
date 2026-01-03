@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import YAML from 'yaml';
 import type { FileEntry, Finding, Manifest, Conventions, Architecture, FullContext, StructurePattern } from '../types/schema.js';
-import type { Abstraction, LanguageFramework } from './patterns.js';
+import type { Abstraction, LanguageFramework, FormattingStyle, ImportStyle, CodeNaming } from './patterns.js';
 
 type NamingStyle = 'kebab-case' | 'snake_case' | 'camelCase' | 'PascalCase' | 'mixed';
 
@@ -12,6 +12,10 @@ interface AnalysisInput {
   structure: Finding<StructurePattern>;
   abstractions: Abstraction[];
   langFramework: LanguageFramework;
+  formatting: FormattingStyle;
+  imports: ImportStyle;
+  codeNaming: CodeNaming;
+  monorepo: Finding<boolean>;
 }
 
 interface InferredContext {
@@ -21,7 +25,7 @@ interface InferredContext {
 }
 
 export function inferConventions(input: AnalysisInput): InferredContext {
-  const { files, naming, structure, abstractions, langFramework } = input;
+  const { files, naming, structure, abstractions, langFramework, formatting, imports, codeNaming, monorepo } = input;
 
   const manifest: Partial<Manifest> = {
     name: path.basename(process.cwd()),
@@ -29,13 +33,23 @@ export function inferConventions(input: AnalysisInput): InferredContext {
     framework: langFramework.framework,
     generated_at: new Date().toISOString(),
     ctx_version: '0.1.0',
+    isMonorepo: monorepo.value ? monorepo : undefined,
   };
 
   const conventions: Conventions = {
     naming: {
       files: naming,
-      functions: { value: 'camelCase', confidence: 'inferred' },
-      classes: { value: 'PascalCase', confidence: 'inferred' },
+      functions: codeNaming.functions,
+      classes: codeNaming.classes,
+    },
+    formatting: {
+      indent: formatting.indent,
+      quotes: formatting.quotes as Finding<string>,
+      semicolons: formatting.semicolons,
+    },
+    imports: {
+      style: imports.style as Finding<string>,
+      nodePrefix: imports.nodePrefix,
     },
   };
 
@@ -61,6 +75,7 @@ export function inferConventions(input: AnalysisInput): InferredContext {
     structure,
     boundaries,
     patterns,
+    isMonorepo: monorepo,
   };
 
   return { manifest, conventions, architecture };

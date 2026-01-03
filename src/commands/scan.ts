@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import YAML from 'yaml';
 import { walkDirectory, loadExclusions } from '../analysis/filesystem.js';
-import { detectNamingConvention, detectStructurePattern, detectAbstractions, detectLanguageFramework } from '../analysis/patterns.js';
+import { detectNamingConvention, detectStructurePattern, detectAbstractions, detectLanguageFramework, detectFormatting, detectImportStyle, detectCodeNaming, detectMonorepo } from '../analysis/patterns.js';
 import { inferConventions, writeContextFiles } from '../analysis/conventions.js';
 
 const CTX_DIR = '.ctx';
@@ -25,7 +25,11 @@ export async function scan(): Promise<void> {
   const naming = detectNamingConvention(files);
   const structure = detectStructurePattern(files);
   const abstractions = detectAbstractions(files);
-  const langFramework = detectLanguageFramework(process.cwd());
+  const langFramework = detectLanguageFramework(process.cwd(), files);
+  const formatting = detectFormatting(files);
+  const imports = detectImportStyle(files);
+  const codeNaming = detectCodeNaming(files);
+  const monorepo = detectMonorepo(process.cwd());
 
   const context = inferConventions({
     files,
@@ -33,6 +37,10 @@ export async function scan(): Promise<void> {
     structure,
     abstractions,
     langFramework,
+    formatting,
+    imports,
+    codeNaming,
+    monorepo,
   });
 
   await writeContextFiles(ctxPath, context);
