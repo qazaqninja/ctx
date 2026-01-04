@@ -119,6 +119,71 @@ export async function generate(
   return data.response;
 }
 
+export type StreamCallback = (tokenCount: number, done: boolean) => void;
+
+export async function generateWithProgress(
+  model: string,
+  prompt: string,
+  options: GenerateOptions = {},
+  onProgress?: StreamCallback
+): Promise<string> {
+  const response = await fetchOllama('/api/generate', {
+    method: 'POST',
+    body: JSON.stringify({
+      model,
+      prompt,
+      stream: true,
+      options: {
+        temperature: options.temperature ?? 0.1,
+        num_predict: options.maxTokens ?? 2000,
+      },
+      system: options.system,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Generation failed: ${error}`);
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error('No response body');
+  }
+
+  const decoder = new TextDecoder();
+  let result = '';
+  let tokenCount = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    const chunk = decoder.decode(value, { stream: true });
+    const lines = chunk.split('\n').filter(line => line.trim());
+
+    for (const line of lines) {
+      try {
+        const data = JSON.parse(line) as { response?: string; done?: boolean };
+        if (data.response) {
+          result += data.response;
+          tokenCount++;
+          if (onProgress) {
+            onProgress(tokenCount, false);
+          }
+        }
+        if (data.done && onProgress) {
+          onProgress(tokenCount, true);
+        }
+      } catch {
+        // Skip invalid JSON lines
+      }
+    }
+  }
+
+  return result;
+}
+
 export function getOllamaHost(): string {
   return OLLAMA_HOST;
 }

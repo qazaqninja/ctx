@@ -1,4 +1,4 @@
-import { generate } from './ollama.js';
+import { generateWithProgress } from './ollama.js';
 import type { AnalysisResult, SemanticPattern } from './analyzer.js';
 
 export interface SynthesizedConstraints {
@@ -22,6 +22,24 @@ function buildPrompt(analysis: AnalysisResult, codebaseInfo: string): string {
     ? analysis.crossFilePatterns.slice(0, 3).map(p => `- ${p.name}`).join('\n')
     : '';
 
+  // Detect if this is a mobile/Flutter app vs backend API
+  const isFlutterApp = codebaseInfo.toLowerCase().includes('flutter') ||
+                       codebaseInfo.toLowerCase().includes('dart');
+  const isBackendApi = codebaseInfo.toLowerCase().includes('express') ||
+                       codebaseInfo.toLowerCase().includes('fastapi') ||
+                       codebaseInfo.toLowerCase().includes('api');
+
+  // Use framework-appropriate examples
+  const archExample = isFlutterApp
+    ? 'Separate UI widgets from business logic using BLoC/Cubit'
+    : isBackendApi
+    ? 'Use the controller pattern for API endpoints'
+    : 'Keep related code together in feature modules';
+
+  const constraintExample = isFlutterApp
+    ? 'Do not call repositories directly from widgets'
+    : 'Do not bypass the established patterns';
+
   // Use a simpler, more direct prompt with few-shot example
   return `Analyze this codebase and list the coding rules developers must follow.
 
@@ -32,20 +50,56 @@ ${patternSummary}
 ${crossFileInfo ? `\nCross-file patterns:\n${crossFileInfo}` : ''}
 
 Based on these patterns, complete the lists below. Be specific and actionable.
+${isFlutterApp ? 'This is a mobile app - focus on UI/state management patterns, not API endpoints.' : ''}
 
 ARCHITECTURE_RULES (structural patterns to follow):
-- Use the controller pattern for API endpoints
+- ${archExample}
 - ${strongPatterns[0]?.name ? `Follow the ${strongPatterns[0].name} consistently` : 'Keep related code together'}
 
 CONVENTIONS (naming and style):
 -
 
 CONSTRAINTS (what NOT to do):
-- Do not bypass the established patterns
+- ${constraintExample}
 -
 
 UNCERTAIN (needs human review):
 - `;
+}
+
+// Patterns to filter out LLM conversational artifacts
+const LLM_ARTIFACTS = [
+  /^#{1,4}\s*/,                          // Markdown headers: ###, ##, etc.
+  /\*{2,}/g,                              // Bold markers: **
+  /^would you like/i,                     // Conversational: "Would you like..."
+  /^let me/i,                             // Conversational: "Let me..."
+  /^here('s| is| are)/i,                  // Conversational: "Here's..."
+  /^i('ll| will| can)/i,                  // Conversational: "I'll..."
+  /^please/i,                             // Conversational: "Please..."
+  /^note:/i,                              // Meta: "Note:"
+  /^example:/i,                           // Meta: "Example:"
+  /^\s*```/,                              // Code blocks
+  /^---+$/,                               // Horizontal rules
+  /\[.*?\]\(.*?\)/g,                      // Markdown links
+];
+
+function cleanLine(line: string): string {
+  let cleaned = line;
+  for (const pattern of LLM_ARTIFACTS) {
+    cleaned = cleaned.replace(pattern, '');
+  }
+  return cleaned.trim();
+}
+
+function isValidConstraint(line: string): boolean {
+  const cleaned = cleanLine(line);
+  // Must have meaningful content
+  if (cleaned.length < 5) return false;
+  // Skip section headers that leaked through
+  if (/^(architecture|conventions?|constraints?|uncertain|rules?|patterns?)\s*:?\s*$/i.test(cleaned)) return false;
+  // Skip meta-commentary
+  if (/^(based on|according to|as seen in|from the)/i.test(cleaned)) return false;
+  return true;
 }
 
 function parseResponse(response: string): SynthesizedConstraints {
@@ -62,7 +116,8 @@ function parseResponse(response: string): SynthesizedConstraints {
     return match[1]
       .split('\n')
       .map(line => line.replace(/^[\s\-*\d.]+/, '').trim())  // Strip whitespace, dashes, asterisks, numbers
-      .filter(line => line.length > 0 && !line.startsWith('('));
+      .map(cleanLine)
+      .filter(isValidConstraint);
   };
 
   return {
@@ -76,19 +131,20 @@ function parseResponse(response: string): SynthesizedConstraints {
 export async function synthesizeConstraints(
   model: string,
   analysis: AnalysisResult,
-  codebaseInfo: string
+  codebaseInfo: string,
+  onProgress?: (tokens: number, done: boolean) => void
 ): Promise<SynthesizedConstraints> {
   const prompt = buildPrompt(analysis, codebaseInfo);
 
   try {
-    const response = await generate(model, prompt, {
+    const response = await generateWithProgress(model, prompt, {
       temperature: 0.1,
       maxTokens: 2000,
-    });
+    }, onProgress);
 
     return parseResponse(response);
   } catch (err) {
-    console.error(`Synthesis failed: ${err}`);
+    console.error(`\nSynthesis failed: ${err}`);
     // Return empty constraints on failure
     return {
       architectureRules: [],

@@ -61,30 +61,48 @@ async function parseFlutterBlocProject(
   // Find feature directories
   const featureDirs = findFeatureDirectories(projectPath);
 
-  // Extract key dependencies
-  const keyDeps = extractKeyDependencies(context);
+  // Extract key dependencies from pubspec.yaml directly
+  const keyDeps = extractDependenciesFromPubspec(projectPath);
 
   // Check for freezed usage
   const usesFreezed = keyDeps.some(d => d.includes('freezed'));
 
-  // Detect database
-  const { databaseType, databaseInfo } = detectDatabase(context);
+  // Detect database from pubspec.yaml directly
+  const { databaseType, databaseInfo } = detectDatabaseFromPubspec(projectPath);
 
   // Find example feature
   const exampleFeature = featureDirs.length > 0
-    ? path.basename(featureDirs[0])
+    ? path.basename(featureDirs[0].replace(/\/$/, ''))
     : 'example';
 
-  // Find registration file
-  const blocRegistrationFile = findBlocRegistrationFile(projectPath);
+  // Find entry points (main*.dart files)
+  const entryPoint = findEntryPoint(projectPath);
 
-  // Find router file
-  const routerFile = findRouterFile(projectPath);
+  // Find registration file by searching for MultiBlocProvider or @injectable
+  const blocRegistrationFile = findFileWithContent(projectPath, 'lib', [
+    'MultiBlocProvider',
+    '@InjectableInit',
+    'GetIt.instance',
+    'getIt.registerSingleton',
+  ]) || findBlocRegistrationFile(projectPath);
+
+  // Find router file - prefer route definition files over usage files
+  // Search in common router locations first
+  const routerFile = findFileWithContent(projectPath, 'lib/src/core/router', [
+    'GoRouter(',
+  ]) || findFileWithContent(projectPath, 'lib/src/router', [
+    'GoRouter(',
+  ]) || findFileWithContent(projectPath, 'lib/router', [
+    'GoRouter(',
+  ]) || findFileWithContent(projectPath, 'lib', [
+    '@MaterialAutoRouter',
+    'AutoRoute(',
+  ]) || findRouterFile(projectPath);
 
   return {
     name: context.manifest.name,
     description: context.manifest.description || 'application',
-    entry_point: 'lib/main.dart',
+    entry_point: entryPoint,
     feature_dirs: featureDirs,
     bloc_count: blocFiles.length,
     bloc_names: blocFiles.map(b => toPascalCase(b.name.replace(/_bloc\.dart$|_cubit\.dart$/, ''))),
@@ -117,31 +135,47 @@ async function parseFlutterRiverpodProject(
   // Find feature directories
   const featureDirs = findFeatureDirectories(projectPath);
 
-  // Extract key dependencies
-  const keyDeps = extractKeyDependencies(context);
+  // Extract key dependencies from pubspec.yaml directly
+  const keyDeps = extractDependenciesFromPubspec(projectPath);
 
   // Check for riverpod generator and freezed usage
-  const usesRiverpodGenerator = keyDeps.some(d => d.includes('riverpod_generator'));
-  const usesFreezed = keyDeps.some(d => d.includes('freezed'));
+  const usesRiverpodGenerator = keyDeps.includes('riverpod_generator');
+  const usesFreezed = keyDeps.includes('freezed');
 
-  // Detect database
-  const { databaseType, databaseInfo } = detectDatabase(context);
+  // Detect database from pubspec.yaml directly
+  const { databaseType, databaseInfo } = detectDatabaseFromPubspec(projectPath);
 
   // Find example feature
   const exampleFeature = featureDirs.length > 0
-    ? path.basename(featureDirs[0])
+    ? path.basename(featureDirs[0].replace(/\/$/, ''))
     : 'example';
 
-  // Find providers file
-  const providersFile = findProvidersFile(projectPath);
+  // Find entry point
+  const entryPoint = findEntryPoint(projectPath);
 
-  // Find router file
-  const routerFile = findRouterFile(projectPath);
+  // Find providers file by searching for ProviderScope or @riverpod
+  const providersFile = findFileWithContent(projectPath, 'lib', [
+    'ProviderScope(',
+    '@riverpod',
+    'final.*Provider',
+  ]) || findProvidersFile(projectPath);
+
+  // Find router file - prefer route definition files over usage files
+  const routerFile = findFileWithContent(projectPath, 'lib/src/core/router', [
+    'GoRouter(',
+  ]) || findFileWithContent(projectPath, 'lib/src/router', [
+    'GoRouter(',
+  ]) || findFileWithContent(projectPath, 'lib/router', [
+    'GoRouter(',
+  ]) || findFileWithContent(projectPath, 'lib', [
+    '@MaterialAutoRouter',
+    'AutoRoute(',
+  ]) || findRouterFile(projectPath);
 
   return {
     name: context.manifest.name,
     description: context.manifest.description || 'application',
-    entry_point: 'lib/main.dart',
+    entry_point: entryPoint,
     feature_dirs: featureDirs,
     provider_count: providerFiles.length,
     provider_names: providerFiles.map(p => toPascalCase(p.name.replace(/_provider\.dart$|_providers\.dart$/, ''))),
@@ -624,4 +658,211 @@ function toPascalCase(str: string): string {
     .split(/[-_]/)
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join('');
+}
+
+// ============================================================================
+// Deterministic Helper Functions (read files directly, no guessing)
+// ============================================================================
+
+/**
+ * Extract dependencies directly from pubspec.yaml
+ */
+function extractDependenciesFromPubspec(projectPath: string): string[] {
+  const pubspecPath = path.join(projectPath, 'pubspec.yaml');
+  if (!fs.existsSync(pubspecPath)) {
+    return [];
+  }
+
+  try {
+    const content = fs.readFileSync(pubspecPath, 'utf-8');
+    const deps: string[] = [];
+
+    // Simple YAML parsing for dependencies section
+    const lines = content.split('\n');
+    let inDependencies = false;
+    let inDevDependencies = false;
+    let baseIndent = 0;
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+
+      // Track which section we're in
+      if (trimmed === 'dependencies:') {
+        inDependencies = true;
+        inDevDependencies = false;
+        baseIndent = line.search(/\S/);
+        continue;
+      }
+      if (trimmed === 'dev_dependencies:') {
+        inDependencies = false;
+        inDevDependencies = true;
+        baseIndent = line.search(/\S/);
+        continue;
+      }
+
+      // Exit section if we hit another top-level key
+      if (trimmed && !trimmed.startsWith('#') && line.search(/\S/) <= baseIndent && (inDependencies || inDevDependencies)) {
+        if (!trimmed.startsWith('-') && trimmed.includes(':') && !trimmed.startsWith('sdk:') && !trimmed.startsWith('git:') && !trimmed.startsWith('path:')) {
+          inDependencies = false;
+          inDevDependencies = false;
+        }
+      }
+
+      // Parse dependency names
+      if ((inDependencies || inDevDependencies) && trimmed && !trimmed.startsWith('#')) {
+        // Match: "  package_name: ^1.0.0" or "  package_name:"
+        const match = trimmed.match(/^([a-z_][a-z0-9_]*)\s*:/);
+        if (match) {
+          const depName = match[1];
+          // Skip "sdk" as it's always a special key (sdk: flutter)
+          // Don't skip "path" as it's a legitimate Dart package
+          if (depName !== 'sdk') {
+            deps.push(depName);
+          }
+        }
+      }
+    }
+
+    return deps;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Detect database from pubspec.yaml directly
+ */
+function detectDatabaseFromPubspec(projectPath: string): { databaseType: string | null; databaseInfo: string | null } {
+  const deps = extractDependenciesFromPubspec(projectPath);
+
+  // Check for specific database packages
+  if (deps.includes('drift') || deps.includes('drift_flutter')) {
+    return { databaseType: 'SQLite (Drift)', databaseInfo: 'drift' };
+  }
+  if (deps.includes('floor')) {
+    return { databaseType: 'SQLite (Floor)', databaseInfo: 'floor' };
+  }
+  if (deps.includes('sqflite') || deps.includes('sqflite_common')) {
+    return { databaseType: 'SQLite (sqflite)', databaseInfo: 'sqflite' };
+  }
+  if (deps.includes('hive') || deps.includes('hive_flutter')) {
+    return { databaseType: 'Hive (NoSQL)', databaseInfo: 'hive' };
+  }
+  if (deps.includes('isar') || deps.includes('isar_flutter_libs')) {
+    return { databaseType: 'Isar (NoSQL)', databaseInfo: 'isar' };
+  }
+  if (deps.includes('realm')) {
+    return { databaseType: 'Realm (NoSQL)', databaseInfo: 'realm' };
+  }
+  if (deps.includes('objectbox')) {
+    return { databaseType: 'ObjectBox (NoSQL)', databaseInfo: 'objectbox' };
+  }
+  if (deps.includes('firebase_database') || deps.includes('cloud_firestore')) {
+    return { databaseType: 'Firebase', databaseInfo: deps.includes('cloud_firestore') ? 'firestore' : 'realtime_database' };
+  }
+  if (deps.includes('supabase') || deps.includes('supabase_flutter')) {
+    return { databaseType: 'Supabase', databaseInfo: 'supabase' };
+  }
+
+  return { databaseType: null, databaseInfo: null };
+}
+
+/**
+ * Find the entry point by searching for main*.dart files
+ */
+function findEntryPoint(projectPath: string): string {
+  const libPath = path.join(projectPath, 'lib');
+  if (!fs.existsSync(libPath)) {
+    return 'lib/main.dart';
+  }
+
+  // Priority order for main files
+  const mainFiles: string[] = [];
+
+  // Search lib/ directory for main*.dart files
+  const searchForMain = (dir: string, relativePath: string) => {
+    try {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isFile() && entry.name.startsWith('main') && entry.name.endsWith('.dart')) {
+          mainFiles.push(path.join(relativePath, entry.name));
+        }
+      }
+    } catch {
+      // Ignore errors
+    }
+  };
+
+  searchForMain(libPath, 'lib');
+
+  if (mainFiles.length === 0) {
+    return 'lib/main.dart';
+  }
+
+  // Prefer main.dart, then main_prod.dart, then main_dev.dart, then first found
+  if (mainFiles.includes('lib/main.dart')) {
+    return 'lib/main.dart';
+  }
+  if (mainFiles.includes('lib/main_prod.dart')) {
+    return 'lib/main_prod.dart';
+  }
+  if (mainFiles.includes('lib/main_dev.dart')) {
+    return 'lib/main_dev.dart';
+  }
+
+  return mainFiles[0];
+}
+
+/**
+ * Search for a file containing specific content patterns
+ * Returns the relative path of the first file found, or null
+ */
+function findFileWithContent(
+  projectPath: string,
+  searchDir: string,
+  patterns: string[]
+): string | null {
+  const fullDir = path.join(projectPath, searchDir);
+  if (!fs.existsSync(fullDir)) {
+    return null;
+  }
+
+  const skipDirs = ['build', '.dart_tool', '.idea', 'test', 'node_modules', '.git', 'dist'];
+
+  const searchRecursively = (dir: string): string | null => {
+    try {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+      // Check files first
+      for (const entry of entries) {
+        if (entry.isFile() && entry.name.endsWith('.dart')) {
+          const fullPath = path.join(dir, entry.name);
+          try {
+            const content = fs.readFileSync(fullPath, 'utf-8');
+            for (const pattern of patterns) {
+              if (content.includes(pattern)) {
+                return path.relative(projectPath, fullPath);
+              }
+            }
+          } catch {
+            // Skip unreadable files
+          }
+        }
+      }
+
+      // Then check subdirectories
+      for (const entry of entries) {
+        if (entry.isDirectory() && !skipDirs.includes(entry.name) && !entry.name.startsWith('.')) {
+          const result = searchRecursively(path.join(dir, entry.name));
+          if (result) return result;
+        }
+      }
+    } catch {
+      // Ignore errors
+    }
+
+    return null;
+  };
+
+  return searchRecursively(fullDir);
 }

@@ -16,6 +16,7 @@ const CTX_DIR = '.ctx';
 interface ScanOptions {
   localAi?: boolean;
   model?: string;
+  embedModel?: string;
 }
 
 export async function scan(options: ScanOptions = {}): Promise<void> {
@@ -47,6 +48,19 @@ export async function scan(options: ScanOptions = {}): Promise<void> {
     }
 
     console.log(`Using local AI: ${options.model}`);
+
+    // Validate or set default embedding model
+    const embedModel = options.embedModel || 'nomic-embed-text';
+    if (embedModel !== options.model) {
+      const embedCheck = await validateModel(embedModel);
+      if (!embedCheck.ok) {
+        console.error(`Error: Embedding model "${embedModel}" not available.`);
+        console.error('Install with: ollama pull nomic-embed-text');
+        console.error('Or specify a different model with --embed-model');
+        process.exit(1);
+      }
+      console.log(`Using embedding model: ${embedModel}`);
+    }
   }
 
   console.log('Scanning...');
@@ -103,16 +117,19 @@ export async function scan(options: ScanOptions = {}): Promise<void> {
   if (options.localAi && options.model) {
     console.log('\nRunning AI-powered semantic analysis...');
 
+    // Use dedicated embedding model (defaults to nomic-embed-text)
+    const embedModel = options.embedModel || 'nomic-embed-text';
+
     // Chunk code
     const chunks = chunkFiles(files);
     const stats = getChunkStats(chunks);
     console.log(`Extracted ${stats.total} code chunks (${stats.byType.function} functions, ${stats.byType.class} classes)`);
 
     if (chunks.length > 0) {
-      // Embed chunks
+      // Embed chunks using embedding model
       console.log('Generating embeddings...');
       let lastProgress = 0;
-      const embedded = await embedChunks(chunks, options.model, ctxPath, (progress) => {
+      const embedded = await embedChunks(chunks, embedModel, ctxPath, (progress) => {
         const percent = Math.round((progress.done / progress.total) * 100);
         if (percent >= lastProgress + 10 || progress.done === progress.total) {
           process.stdout.write(`\r  Embedding: ${percent}% (${progress.done}/${progress.total})`);
@@ -150,9 +167,21 @@ export async function scan(options: ScanOptions = {}): Promise<void> {
       };
 
       // Synthesize constraints via LLM
-      console.log('Synthesizing constraints...');
+      process.stdout.write('Synthesizing constraints...');
+      const spinnerFrames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+      let spinnerIdx = 0;
+      let lastTokenCount = 0;
+
       const codebaseInfo = `${langFramework.language.value} ${langFramework.framework?.value || ''} project. ${files.length} files.`;
-      const synthesized = await synthesizeConstraints(options.model, analysis, codebaseInfo);
+      const synthesized = await synthesizeConstraints(options.model, analysis, codebaseInfo, (tokens, done) => {
+        if (done) {
+          process.stdout.write(`\rSynthesizing constraints... done (${tokens} tokens)\n`);
+        } else if (tokens > lastTokenCount) {
+          lastTokenCount = tokens;
+          spinnerIdx = (spinnerIdx + 1) % spinnerFrames.length;
+          process.stdout.write(`\rSynthesizing constraints... ${spinnerFrames[spinnerIdx]} ${tokens} tokens`);
+        }
+      });
 
       if (synthesized.architectureRules.length > 0 || synthesized.constraints.length > 0) {
         console.log('AI-generated constraints:');
