@@ -168,77 +168,291 @@ export function autoCluster(chunks: EmbeddedChunk[], maxK: number = 10): Cluster
   return clusterChunks(chunks, k);
 }
 
+// Pattern matchers for specific file types - returns { label, detail } or null
+interface PatternMatch {
+  label: string;
+  detail?: string;
+}
+
+interface FilePatternRule {
+  // Match by file suffix (e.g., '_bloc.dart')
+  fileSuffix?: string;
+  // Match by directory path pattern
+  pathPattern?: RegExp;
+  // Match by class/function name suffix
+  nameSuffix?: string;
+  // The label to use
+  label: string;
+  // Optional detail about the pattern (e.g., "using Freezed pattern")
+  detail?: string;
+}
+
+const FILE_PATTERN_RULES: FilePatternRule[] = [
+  // Flutter/Dart BLoC patterns
+  { fileSuffix: '_bloc.dart', label: 'BLoC classes', detail: 'event-driven state management' },
+  { fileSuffix: '_cubit.dart', label: 'Cubit classes', detail: 'simplified BLoC pattern' },
+  { fileSuffix: '_state.dart', label: 'State classes', detail: 'using Freezed pattern' },
+  { fileSuffix: '_event.dart', label: 'BLoC event classes', detail: 'event-driven architecture' },
+
+  // Flutter/Dart data layer patterns
+  { fileSuffix: '_model.dart', label: 'Data models' },
+  { fileSuffix: '_entity.dart', label: 'Domain entities' },
+  { fileSuffix: '_dto.dart', label: 'Data transfer objects' },
+  { fileSuffix: '_repository.dart', label: 'Repository classes', detail: 'data access layer' },
+  { fileSuffix: '_datasource.dart', label: 'Data sources', detail: 'remote/local data access' },
+  { fileSuffix: '_service.dart', label: 'Service classes' },
+  { fileSuffix: '_usecase.dart', label: 'Use case classes', detail: 'clean architecture' },
+
+  // Flutter/Dart UI patterns
+  { fileSuffix: '_page.dart', label: 'Page widgets', detail: 'screen-level components' },
+  { fileSuffix: '_screen.dart', label: 'Screen widgets', detail: 'screen-level components' },
+  { fileSuffix: '_widget.dart', label: 'Custom widgets', detail: 'reusable UI components' },
+  { fileSuffix: '_view.dart', label: 'View widgets' },
+  { fileSuffix: '_dialog.dart', label: 'Dialog widgets' },
+  { fileSuffix: '_card.dart', label: 'Card widgets' },
+  { fileSuffix: '_button.dart', label: 'Button widgets' },
+  { fileSuffix: '_form.dart', label: 'Form widgets' },
+
+  // Flutter/Dart provider patterns
+  { fileSuffix: '_provider.dart', label: 'Provider classes', detail: 'state management' },
+  { fileSuffix: '_notifier.dart', label: 'Notifier classes', detail: 'Riverpod/ChangeNotifier pattern' },
+  { fileSuffix: '_controller.dart', label: 'Controller classes' },
+
+  // Path-based patterns for clean architecture
+  { pathPattern: /\/domain\/entities\//, label: 'Domain entities', detail: 'clean architecture core' },
+  { pathPattern: /\/domain\/repositories\//, label: 'Repository interfaces', detail: 'domain contracts' },
+  { pathPattern: /\/domain\/usecases\//, label: 'Use cases', detail: 'business logic' },
+  { pathPattern: /\/data\/models\//, label: 'Data transfer objects', detail: 'API/DB models' },
+  { pathPattern: /\/data\/repositories\//, label: 'Repository implementations', detail: 'data layer' },
+  { pathPattern: /\/data\/datasources\//, label: 'Data sources', detail: 'remote/local access' },
+  { pathPattern: /\/presentation\/bloc\//, label: 'BLoC classes', detail: 'presentation layer' },
+  { pathPattern: /\/presentation\/pages\//, label: 'Page widgets', detail: 'screen-level UI' },
+  { pathPattern: /\/presentation\/widgets\//, label: 'Custom widgets', detail: 'reusable components' },
+  { pathPattern: /\/features\/[^/]+\/bloc\//, label: 'Feature BLoCs', detail: 'feature-scoped state' },
+  { pathPattern: /\/features\/[^/]+\/pages\//, label: 'Feature pages', detail: 'feature UI' },
+
+  // TypeScript/JavaScript patterns
+  { fileSuffix: '.service.ts', label: 'Service classes' },
+  { fileSuffix: '.repository.ts', label: 'Repository classes' },
+  { fileSuffix: '.controller.ts', label: 'Controller classes' },
+  { fileSuffix: '.middleware.ts', label: 'Middleware' },
+  { fileSuffix: '.handler.ts', label: 'Handler classes' },
+  { fileSuffix: '.resolver.ts', label: 'GraphQL resolvers' },
+  { fileSuffix: '.guard.ts', label: 'Guards', detail: 'authentication/authorization' },
+  { fileSuffix: '.pipe.ts', label: 'Pipes', detail: 'data transformation' },
+  { fileSuffix: '.interceptor.ts', label: 'Interceptors' },
+  { fileSuffix: '.decorator.ts', label: 'Decorators' },
+  { fileSuffix: '.module.ts', label: 'Module definitions' },
+  { fileSuffix: '.dto.ts', label: 'Data transfer objects' },
+  { fileSuffix: '.entity.ts', label: 'Entity classes', detail: 'ORM entities' },
+
+  // React patterns
+  { fileSuffix: '.hook.ts', label: 'Custom hooks' },
+  { fileSuffix: '.hook.tsx', label: 'Custom hooks' },
+  { fileSuffix: '.context.tsx', label: 'React contexts' },
+  { fileSuffix: '.provider.tsx', label: 'Context providers' },
+  { fileSuffix: '.store.ts', label: 'State stores' },
+  { fileSuffix: '.slice.ts', label: 'Redux slices', detail: 'Redux Toolkit pattern' },
+  { fileSuffix: '.reducer.ts', label: 'Reducers' },
+  { fileSuffix: '.action.ts', label: 'Action creators' },
+  { fileSuffix: '.selector.ts', label: 'State selectors' },
+
+  // Test patterns
+  { fileSuffix: '.test.ts', label: 'Unit tests' },
+  { fileSuffix: '.test.tsx', label: 'Component tests' },
+  { fileSuffix: '.spec.ts', label: 'Test specifications' },
+  { fileSuffix: '_test.dart', label: 'Unit tests' },
+  { fileSuffix: '_test.go', label: 'Unit tests' },
+  { pathPattern: /__tests__\//, label: 'Test files' },
+  { pathPattern: /\/test\//, label: 'Test files' },
+  { pathPattern: /\/tests\//, label: 'Test files' },
+
+  // Go patterns
+  { fileSuffix: '_handler.go', label: 'HTTP handlers' },
+  { fileSuffix: '_service.go', label: 'Service implementations' },
+  { fileSuffix: '_repository.go', label: 'Repository implementations' },
+  { fileSuffix: '_middleware.go', label: 'Middleware' },
+
+  // Python patterns
+  { fileSuffix: '_service.py', label: 'Service classes' },
+  { fileSuffix: '_repository.py', label: 'Repository classes' },
+  { fileSuffix: '_model.py', label: 'Data models' },
+  { fileSuffix: '_schema.py', label: 'Pydantic schemas' },
+  { fileSuffix: '_router.py', label: 'API routers', detail: 'FastAPI routes' },
+];
+
+function matchFilePattern(file: string): PatternMatch | null {
+  for (const rule of FILE_PATTERN_RULES) {
+    if (rule.fileSuffix && file.endsWith(rule.fileSuffix)) {
+      return { label: rule.label, detail: rule.detail };
+    }
+    if (rule.pathPattern && rule.pathPattern.test(file)) {
+      return { label: rule.label, detail: rule.detail };
+    }
+  }
+  return null;
+}
+
 // Label clusters based on common patterns in chunk names and file paths
 export function labelClusters(clusters: Cluster[]): Cluster[] {
   return clusters.map(cluster => {
     const names = cluster.chunks.map(c => c.name);
     const files = cluster.chunks.map(c => c.file);
     const types = cluster.chunks.map(c => c.type);
+    const count = cluster.chunks.length;
 
-    // Find common suffix patterns in names
-    const suffixes: Record<string, number> = {};
-    for (const name of names) {
-      const matches = name.match(/(Service|Repository|Controller|Handler|Middleware|Utils?|Helper|Manager|Factory|Provider|Validator|Parser|Builder|Resolver)$/i);
-      if (matches) {
-        const suffix = matches[1].toLowerCase();
-        suffixes[suffix] = (suffixes[suffix] || 0) + 1;
+    // STEP 1: Try file pattern rules first (most specific)
+    const patternCounts: Map<string, { count: number; detail?: string }> = new Map();
+    for (const file of files) {
+      const match = matchFilePattern(file);
+      if (match) {
+        const existing = patternCounts.get(match.label);
+        if (existing) {
+          existing.count++;
+        } else {
+          patternCounts.set(match.label, { count: 1, detail: match.detail });
+        }
       }
     }
 
-    // Find most common suffix
+    // Find dominant file pattern (if > 50% of files match)
     let label: string | undefined;
-    let maxCount = 0;
-    for (const [suffix, count] of Object.entries(suffixes)) {
-      if (count > maxCount && count >= cluster.chunks.length * 0.3) {
-        maxCount = count;
-        label = suffix + ' pattern';
+    let labelDetail: string | undefined;
+
+    const sortedPatterns = [...patternCounts.entries()].sort((a, b) => b[1].count - a[1].count);
+    if (sortedPatterns.length > 0) {
+      const [bestPattern, { count: patternCount, detail }] = sortedPatterns[0];
+      if (patternCount >= count * 0.5) {
+        label = `${patternCount} ${bestPattern}`;
+        labelDetail = detail;
       }
     }
 
-    // Try to identify by directory patterns
+    // STEP 2: Try name-based suffix patterns (Service, Repository, etc.)
+    if (!label) {
+      const suffixes: Record<string, number> = {};
+      for (const name of names) {
+        const matches = name.match(/(Service|Repository|Controller|Handler|Middleware|Utils?|Helper|Manager|Factory|Provider|Validator|Parser|Builder|Resolver|Bloc|Cubit|State|Event|Model|Entity|Widget|Page|Screen|View)$/i);
+        if (matches) {
+          const suffix = matches[1].toLowerCase();
+          suffixes[suffix] = (suffixes[suffix] || 0) + 1;
+        }
+      }
+
+      let maxCount = 0;
+      let bestSuffix = '';
+      for (const [suffix, suffixCount] of Object.entries(suffixes)) {
+        if (suffixCount > maxCount && suffixCount >= count * 0.3) {
+          maxCount = suffixCount;
+          bestSuffix = suffix;
+        }
+      }
+
+      if (bestSuffix) {
+        // Map suffix to proper label
+        const suffixLabels: Record<string, string> = {
+          service: 'Service classes',
+          repository: 'Repository classes',
+          controller: 'Controller classes',
+          handler: 'Handler classes',
+          middleware: 'Middleware',
+          util: 'Utility functions',
+          utils: 'Utility functions',
+          helper: 'Helper functions',
+          manager: 'Manager classes',
+          factory: 'Factory classes',
+          provider: 'Provider classes',
+          validator: 'Validators',
+          parser: 'Parsers',
+          builder: 'Builder classes',
+          resolver: 'Resolver classes',
+          bloc: 'BLoC classes',
+          cubit: 'Cubit classes',
+          state: 'State classes',
+          event: 'Event classes',
+          model: 'Data models',
+          entity: 'Entity classes',
+          widget: 'Widget classes',
+          page: 'Page widgets',
+          screen: 'Screen widgets',
+          view: 'View classes',
+        };
+        label = `${maxCount} ${suffixLabels[bestSuffix] || bestSuffix + ' pattern'}`;
+      }
+    }
+
+    // STEP 3: Try to identify by directory patterns
     if (!label) {
       const dirPatterns: Record<string, number> = {};
       for (const file of files) {
         const parts = file.split('/');
         for (const part of parts) {
+          const partLower = part.toLowerCase();
           // Common directory names
-          if (['test', 'tests', '__tests__', 'spec', 'fixtures'].includes(part.toLowerCase())) {
-            dirPatterns['test fixtures'] = (dirPatterns['test fixtures'] || 0) + 1;
-          } else if (['cli', 'commands', 'cmd'].includes(part.toLowerCase())) {
+          if (['test', 'tests', '__tests__', 'spec', 'fixtures'].includes(partLower)) {
+            dirPatterns['Test files'] = (dirPatterns['Test files'] || 0) + 1;
+          } else if (['cli', 'commands', 'cmd'].includes(partLower)) {
             dirPatterns['CLI commands'] = (dirPatterns['CLI commands'] || 0) + 1;
-          } else if (['routes', 'api', 'endpoints'].includes(part.toLowerCase())) {
+          } else if (['routes', 'api', 'endpoints'].includes(partLower)) {
             dirPatterns['API routes'] = (dirPatterns['API routes'] || 0) + 1;
-          } else if (['models', 'entities', 'domain'].includes(part.toLowerCase())) {
-            dirPatterns['domain models'] = (dirPatterns['domain models'] || 0) + 1;
-          } else if (['utils', 'helpers', 'shared'].includes(part.toLowerCase())) {
-            dirPatterns['utility functions'] = (dirPatterns['utility functions'] || 0) + 1;
+          } else if (['models', 'entities', 'domain'].includes(partLower)) {
+            dirPatterns['Domain models'] = (dirPatterns['Domain models'] || 0) + 1;
+          } else if (['utils', 'helpers', 'shared', 'common'].includes(partLower)) {
+            dirPatterns['Utility functions'] = (dirPatterns['Utility functions'] || 0) + 1;
+          } else if (['components', 'widgets', 'ui'].includes(partLower)) {
+            dirPatterns['UI components'] = (dirPatterns['UI components'] || 0) + 1;
+          } else if (['hooks'].includes(partLower)) {
+            dirPatterns['Custom hooks'] = (dirPatterns['Custom hooks'] || 0) + 1;
+          } else if (['stores', 'state'].includes(partLower)) {
+            dirPatterns['State management'] = (dirPatterns['State management'] || 0) + 1;
+          } else if (['bloc', 'blocs'].includes(partLower)) {
+            dirPatterns['BLoC classes'] = (dirPatterns['BLoC classes'] || 0) + 1;
+          } else if (['pages', 'screens', 'views'].includes(partLower)) {
+            dirPatterns['Page/Screen widgets'] = (dirPatterns['Page/Screen widgets'] || 0) + 1;
           }
         }
       }
 
       const bestDir = Object.entries(dirPatterns).sort((a, b) => b[1] - a[1])[0];
-      if (bestDir && bestDir[1] >= cluster.chunks.length * 0.4) {
-        label = bestDir[0];
+      if (bestDir && bestDir[1] >= count * 0.4) {
+        label = `${bestDir[1]} ${bestDir[0]}`;
       }
     }
 
-    // Try function naming patterns
+    // STEP 4: Try function naming patterns
     if (!label) {
       const prefixes: Record<string, number> = {};
       for (const name of names) {
-        const match = name.match(/^(get|set|create|update|delete|find|fetch|handle|process|validate|parse|build|render|on)/i);
+        const match = name.match(/^(get|set|create|update|delete|find|fetch|handle|process|validate|parse|build|render|on|use)/i);
         if (match) {
           prefixes[match[1].toLowerCase()] = (prefixes[match[1].toLowerCase()] || 0) + 1;
         }
       }
 
       const bestPrefix = Object.entries(prefixes).sort((a, b) => b[1] - a[1])[0];
-      if (bestPrefix && bestPrefix[1] >= cluster.chunks.length * 0.4) {
-        label = `${bestPrefix[0]}* methods`;
+      if (bestPrefix && bestPrefix[1] >= count * 0.4) {
+        const prefixLabels: Record<string, string> = {
+          get: 'Getter methods',
+          set: 'Setter methods',
+          create: 'Creator functions',
+          update: 'Update handlers',
+          delete: 'Delete handlers',
+          find: 'Query methods',
+          fetch: 'Data fetching functions',
+          handle: 'Event handlers',
+          process: 'Processing functions',
+          validate: 'Validation functions',
+          parse: 'Parser functions',
+          build: 'Builder functions',
+          render: 'Render methods',
+          on: 'Event callbacks',
+          use: 'Custom hooks',
+        };
+        label = `${bestPrefix[1]} ${prefixLabels[bestPrefix[0]] || bestPrefix[0] + '* methods'}`;
       }
     }
 
-    // Final fallback: describe by type and count
+    // STEP 5: Final fallback - describe by type with better language
     if (!label) {
       const typeCount: Record<string, number> = {};
       for (const type of types) {
@@ -246,11 +460,26 @@ export function labelClusters(clusters: Cluster[]): Cluster[] {
       }
       const dominantType = Object.entries(typeCount).sort((a, b) => b[1] - a[1])[0];
       if (dominantType) {
-        label = `${cluster.chunks.length} similar ${dominantType[0]}s`;
+        const [typeName, typeOccurrences] = dominantType;
+        const typeLabels: Record<string, string> = {
+          class: 'classes',
+          function: 'functions',
+          method: 'methods',
+          interface: 'interfaces',
+          type: 'type definitions',
+          enum: 'enums',
+          const: 'constants',
+          variable: 'variables',
+        };
+        const plural = typeLabels[typeName] || `${typeName}s`;
+        label = `${typeOccurrences} related ${plural}`;
       }
     }
 
-    return { ...cluster, label };
+    // Build final label with detail if available
+    const finalLabel = labelDetail ? `${label} (${labelDetail})` : label;
+
+    return { ...cluster, label: finalLabel };
   });
 }
 

@@ -122,6 +122,73 @@ function extractChunks(content: string, file: string): ChunkMatch[] {
         braceDepth = (line.match(/{/g) || []).length - (line.match(/}/g) || []).length;
         continue;
       }
+
+      // Dart mixin declaration
+      const mixinMatch = trimmed.match(/^mixin\s+([A-Za-z_][A-Za-z0-9_]*)/);
+      if (mixinMatch) {
+        if (currentChunk && chunkLines.length > 0) {
+          chunks.push({
+            type: currentChunk.type!,
+            name: currentChunk.name!,
+            content: chunkLines.join('\n'),
+            startLine: chunkStartLine,
+            endLine: i - 1,
+          });
+        }
+        currentChunk = { type: 'class', name: mixinMatch[1] };
+        chunkStartLine = i + 1;
+        chunkLines = [line];
+        braceDepth = (line.match(/{/g) || []).length - (line.match(/}/g) || []).length;
+        continue;
+      }
+
+      // Dart extension declaration
+      const extensionMatch = trimmed.match(/^extension\s+([A-Za-z_][A-Za-z0-9_]*)\s+on/);
+      if (extensionMatch) {
+        if (currentChunk && chunkLines.length > 0) {
+          chunks.push({
+            type: currentChunk.type!,
+            name: currentChunk.name!,
+            content: chunkLines.join('\n'),
+            startLine: chunkStartLine,
+            endLine: i - 1,
+          });
+        }
+        currentChunk = { type: 'class', name: extensionMatch[1] };
+        chunkStartLine = i + 1;
+        chunkLines = [line];
+        braceDepth = (line.match(/{/g) || []).length - (line.match(/}/g) || []).length;
+        continue;
+      }
+
+      // Dart enum declaration
+      const enumMatch = trimmed.match(/^enum\s+([A-Za-z_][A-Za-z0-9_]*)/);
+      if (enumMatch) {
+        if (currentChunk && chunkLines.length > 0) {
+          chunks.push({
+            type: currentChunk.type!,
+            name: currentChunk.name!,
+            content: chunkLines.join('\n'),
+            startLine: chunkStartLine,
+            endLine: i - 1,
+          });
+        }
+        currentChunk = { type: 'block', name: enumMatch[1] };
+        chunkStartLine = i + 1;
+        chunkLines = [line];
+        braceDepth = (line.match(/{/g) || []).length - (line.match(/}/g) || []).length;
+        continue;
+      }
+
+      // Dart top-level function (void, Future, etc.)
+      const dartFuncMatch = trimmed.match(/^(?:Future<[^>]+>|void|String|int|bool|double|dynamic|List<[^>]+>|Map<[^>]+>|[A-Z][A-Za-z0-9_]*)\s+([a-z_][A-Za-z0-9_]*)\s*\(/);
+      if (dartFuncMatch && !currentChunk) {
+        currentChunk = { type: 'function', name: dartFuncMatch[1] };
+        chunkStartLine = i + 1;
+        chunkLines = [line];
+        braceDepth = (line.match(/{/g) || []).length - (line.match(/}/g) || []).length;
+        continue;
+      }
     }
 
     // Continue building current chunk
@@ -184,11 +251,11 @@ export function chunkFile(file: FileEntry): CodeChunk[] {
 
 export function chunkFiles(files: FileEntry[]): CodeChunk[] {
   const chunks: CodeChunk[] = [];
-  const jstsFiles = files.filter(f =>
-    ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'].includes(f.extension)
+  const supportedFiles = files.filter(f =>
+    ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.dart'].includes(f.extension)
   );
 
-  for (const file of jstsFiles) {
+  for (const file of supportedFiles) {
     chunks.push(...chunkFile(file));
   }
 

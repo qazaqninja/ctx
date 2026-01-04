@@ -8,35 +8,35 @@ naming:
     value: camelCase
     confidence: observed
     evidence:
-      - 73/83 identifiers use camelCase
+      - 84/96 identifiers use camelCase
   classes:
     value: mixed
     confidence: observed
     evidence:
-      - 1/1 identifiers use mixed
+      - 3/3 identifiers use mixed
 formatting:
   indent:
     value: 4 spaces
     confidence: observed
     evidence:
-      - Analyzed 17 files
+      - Analyzed 18 files
   quotes:
     value: single
     confidence: observed
     evidence:
-      - 679 single vs 20 double quotes
+      - 804 single vs 8 double quotes
   semicolons:
     value: true
     confidence: observed
     evidence:
-      - 560 lines with semicolons, 72 without
+      - 605 lines with semicolons, 68 without
 imports:
   style:
     value: mixed
     confidence: observed
     evidence:
-      - 33 named imports, 29 default imports
-  nodePrefix:
+      - 35 named imports, 31 default imports
+  builtinPrefix:
     value: false
     confidence: observed
     evidence:

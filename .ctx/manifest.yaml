@@ -3,6 +3,6 @@ language:
   value: typescript
   confidence: observed
   evidence:
-    - 17 TypeScript files found
-generated_at: 2026-01-03T22:29:56.824Z
+    - 18 TypeScript files found
+generated_at: 2026-01-04T16:23:56.769Z
 ctx_version: 0.1.0

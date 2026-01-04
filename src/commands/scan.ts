@@ -2,8 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import YAML from 'yaml';
 import { walkDirectory, loadExclusions } from '../analysis/filesystem.js';
-import { detectNamingConvention, detectStructurePattern, detectAbstractions, detectLanguageFramework, detectFormatting, detectImportStyle, detectCodeNaming, detectMonorepo } from '../analysis/patterns.js';
+import { detectNamingConvention, detectStructurePattern, detectAbstractions, detectLanguageFramework, detectFormatting, detectImportStyle, detectCodeNaming, detectMonorepo, detectDependencyContext } from '../analysis/patterns.js';
 import { inferConventions, writeContextFiles } from '../analysis/conventions.js';
+import { buildFileIndex, saveFileIndex } from '../analysis/indexer.js';
 import { checkConnection, validateModel } from '../ai/ollama.js';
 import { chunkFiles, getChunkStats } from '../ai/chunker.js';
 import { embedChunks } from '../ai/embeddings.js';
@@ -64,6 +65,12 @@ export async function scan(options: ScanOptions = {}): Promise<void> {
   const imports = detectImportStyle(files);
   const codeNaming = detectCodeNaming(files);
   const monorepo = detectMonorepo(process.cwd());
+  const dependencyContext = detectDependencyContext(process.cwd());
+
+  // Log dependency context for Dart/Flutter projects
+  if (dependencyContext && dependencyContext.dependencies.length > 0) {
+    console.log(`Found ${dependencyContext.dependencies.length} dependencies, ${dependencyContext.devDependencies.length} dev dependencies`);
+  }
 
   const context = inferConventions({
     files,
@@ -75,14 +82,26 @@ export async function scan(options: ScanOptions = {}): Promise<void> {
     imports,
     codeNaming,
     monorepo,
+    dependencyContext,
   });
 
-  // AI analysis (if enabled)
+  // Build compact file index (always generated, replaces heavy embeddings for most use cases)
+  console.log('Building file index...');
+  const fileIndex = buildFileIndex(files);
+  saveFileIndex(ctxPath, fileIndex);
+  console.log(`Created index with ${fileIndex.summary.total_keywords} keywords across ${fileIndex.summary.domains_count} domains`);
+
+  // AI analysis (ONLY when --local-ai is used)
+  // This includes:
+  // 1. Code chunking and embedding generation
+  // 2. Semantic clustering and pattern detection
+  // 3. LLM-based constraint synthesis
+  // Without --local-ai, only deterministic pattern detection is performed
   let aiConstraints: ReturnType<typeof formatConstraintsForYaml> | null = null;
   let semanticPatterns: { patterns: unknown[]; crossFilePatterns: unknown[] } | null = null;
 
   if (options.localAi && options.model) {
-    console.log('\nRunning semantic analysis...');
+    console.log('\nRunning AI-powered semantic analysis...');
 
     // Chunk code
     const chunks = chunkFiles(files);
@@ -185,8 +204,16 @@ export async function scan(options: ScanOptions = {}): Promise<void> {
   }
 
   console.log(`\nDetected patterns: ${counts.observed} observed, ${counts.inferred} inferred, ${counts.uncertain} uncertain`);
+  console.log(`\nGenerated files:`);
+  console.log(`  ${CTX_DIR}/index.yaml (compact file index for quick lookups)`);
+  console.log(`  ${CTX_DIR}/manifest.yaml`);
+  console.log(`  ${CTX_DIR}/conventions.yaml`);
+  console.log(`  ${CTX_DIR}/architecture.yaml`);
 
   if (options.localAi) {
-    console.log(`AI analysis cached to ${CTX_DIR}/embeddings.json`);
+    console.log(`  ${CTX_DIR}/embeddings.json (AI embeddings cache - only with --local-ai)`);
+    if (aiConstraints) {
+      console.log(`  ${CTX_DIR}/constraints.yaml (AI-generated constraints)`);
+    }
   }
 }

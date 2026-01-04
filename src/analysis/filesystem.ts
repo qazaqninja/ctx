@@ -40,6 +40,7 @@ export async function walkDirectory(root: string, exclusions: string[]): Promise
     '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs',
     '.py', '.go', '.rs', '.java', '.kt', '.swift',
     '.rb', '.php', '.cs', '.cpp', '.c', '.h',
+    '.dart',
   ];
 
   const entries: FileEntry[] = [];

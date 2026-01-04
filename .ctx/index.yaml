@@ -1,0 +1,1010 @@
+generated_at: "2026-01-04T16:23:56.774Z"
+ctx_version: "0.1.0"
+domains:
+  root:
+    - "src/index.ts"
+    - "src/types/schema.ts"
+  ai:
+    - "src/ai/analyzer.ts"
+    - "src/ai/chunker.ts"
+    - "src/ai/embeddings.ts"
+    - "src/ai/ollama.ts"
+    - "src/ai/synthesizer.ts"
+    - "src/ai/vectors.ts"
+  analysis:
+    - "src/analysis/conventions.ts"
+    - "src/analysis/filesystem.ts"
+    - "src/analysis/indexer.ts"
+    - "src/analysis/patterns.ts"
+  commands:
+    - "src/commands/explain.ts"
+    - "src/commands/init.ts"
+    - "src/commands/inject.ts"
+    - "src/commands/scan.ts"
+  synthesis:
+    - "src/synthesis/explainer.ts"
+    - "src/synthesis/injector.ts"
+index:
+  unique:
+    - "src/ai/analyzer.ts:20"
+  files:
+    - "src/ai/analyzer.ts:20"
+    - "src/ai/chunker.ts:252"
+    - "src/analysis/conventions.ts:191"
+  unique files:
+    - "src/ai/analyzer.ts:20"
+  "function: uniquefiles":
+    - "src/ai/analyzer.ts:20"
+  analyze:
+    - "src/ai/analyzer.ts:24"
+  embeddings:
+    - "src/ai/analyzer.ts:24"
+    - "src/ai/embeddings.ts"
+  analyze embeddings:
+    - "src/ai/analyzer.ts:24"
+  "function: analyzeembeddings":
+    - "src/ai/analyzer.ts:24"
+  find:
+    - "src/ai/analyzer.ts:117"
+    - "src/ai/vectors.ts:51"
+    - "src/ai/vectors.ts:65"
+  common:
+    - "src/ai/analyzer.ts:117"
+  pattern:
+    - "src/ai/analyzer.ts:117"
+    - "src/ai/analyzer.ts:4"
+    - "src/analysis/patterns.ts:57"
+    - "src/types/schema.ts:49"
+  find common:
+    - "src/ai/analyzer.ts:117"
+  common pattern:
+    - "src/ai/analyzer.ts:117"
+  find common pattern:
+    - "src/ai/analyzer.ts:117"
+  "function: findcommonpattern":
+    - "src/ai/analyzer.ts:117"
+  summarize:
+    - "src/ai/analyzer.ts:142"
+  analysis:
+    - "src/ai/analyzer.ts:13"
+    - "src/ai/analyzer.ts:142"
+    - "src/analysis/conventions.ts:9"
+  summarize analysis:
+    - "src/ai/analyzer.ts:142"
+  "function: summarizeanalysis":
+    - "src/ai/analyzer.ts:142"
+  semantic:
+    - "src/ai/analyzer.ts:4"
+    - "src/synthesis/explainer.ts:157"
+  semantic pattern:
+    - "src/ai/analyzer.ts:4"
+  "interface: semanticpattern":
+    - "src/ai/analyzer.ts:4"
+  result:
+    - "src/ai/analyzer.ts:13"
+    - "src/ai/vectors.ts:3"
+    - "src/analysis/patterns.ts:116"
+  analysis result:
+    - "src/ai/analyzer.ts:13"
+  "interface: analysisresult":
+    - "src/ai/analyzer.ts:13"
+  analyzer:
+    - "src/ai/analyzer.ts"
+  hash:
+    - "src/ai/chunker.ts:17"
+    - "src/ai/embeddings.ts:19"
+  content:
+    - "src/ai/chunker.ts:17"
+  hash content:
+    - "src/ai/chunker.ts:17"
+  "function: hashcontent":
+    - "src/ai/chunker.ts:17"
+  chunks:
+    - "src/ai/chunker.ts:29"
+    - "src/ai/embeddings.ts:54"
+    - "src/ai/vectors.ts:88"
+  extract chunks:
+    - "src/ai/chunker.ts:29"
+  "function: extractchunks":
+    - "src/ai/chunker.ts:29"
+  chunk file:
+    - "src/ai/chunker.ts:230"
+  "function: chunkfile":
+    - "src/ai/chunker.ts:230"
+  chunk files:
+    - "src/ai/chunker.ts:252"
+  "function: chunkfiles":
+    - "src/ai/chunker.ts:252"
+  get:
+    - "src/ai/chunker.ts:265"
+    - "src/ai/embeddings.ts:149"
+    - "src/ai/ollama.ts:122"
+    - "src/analysis/filesystem.ts:64"
+    - "src/synthesis/injector.ts:77"
+  stats:
+    - "src/ai/chunker.ts:265"
+    - "src/ai/embeddings.ts:149"
+  get chunk:
+    - "src/ai/chunker.ts:265"
+  chunk stats:
+    - "src/ai/chunker.ts:265"
+  get chunk stats:
+    - "src/ai/chunker.ts:265"
+  "function: getchunkstats":
+    - "src/ai/chunker.ts:265"
+  type:
+    - "src/ai/chunker.ts:5"
+  chunk type:
+    - "src/ai/chunker.ts:5"
+  "type: chunktype":
+    - "src/ai/chunker.ts:5"
+  code:
+    - "src/ai/chunker.ts:7"
+    - "src/analysis/patterns.ts:287"
+    - "src/analysis/patterns.ts:566"
+  code chunk:
+    - "src/ai/chunker.ts:7"
+  "interface: codechunk":
+    - "src/ai/chunker.ts:7"
+  match:
+    - "src/ai/chunker.ts:21"
+  chunk match:
+    - "src/ai/chunker.ts:21"
+  "interface: chunkmatch":
+    - "src/ai/chunker.ts:21"
+  chunker:
+    - "src/ai/chunker.ts"
+  hash file:
+    - "src/ai/embeddings.ts:19"
+  "function: hashfile":
+    - "src/ai/embeddings.ts:19"
+  load:
+    - "src/ai/embeddings.ts:28"
+    - "src/analysis/filesystem.ts:8"
+    - "src/analysis/indexer.ts:354"
+    - "src/synthesis/explainer.ts:23"
+  cache:
+    - "src/ai/embeddings.ts:11"
+    - "src/ai/embeddings.ts:28"
+    - "src/ai/embeddings.ts:41"
+  load cache:
+    - "src/ai/embeddings.ts:28"
+  "function: loadcache":
+    - "src/ai/embeddings.ts:28"
+  save:
+    - "src/ai/embeddings.ts:41"
+    - "src/analysis/indexer.ts:338"
+  save cache:
+    - "src/ai/embeddings.ts:41"
+  "function: savecache":
+    - "src/ai/embeddings.ts:41"
+  embed:
+    - "src/ai/embeddings.ts:46"
+    - "src/ai/embeddings.ts:54"
+    - "src/ai/ollama.ts:58"
+    - "src/ai/ollama.ts:76"
+  embed chunks:
+    - "src/ai/embeddings.ts:54"
+  "function: embedchunks":
+    - "src/ai/embeddings.ts:54"
+  embedding:
+    - "src/ai/embeddings.ts:11"
+    - "src/ai/embeddings.ts:149"
+  get embedding:
+    - "src/ai/embeddings.ts:149"
+  embedding stats:
+    - "src/ai/embeddings.ts:149"
+  get embedding stats:
+    - "src/ai/embeddings.ts:149"
+  "function: getembeddingstats":
+    - "src/ai/embeddings.ts:149"
+  embedded:
+    - "src/ai/embeddings.ts:7"
+  embedded chunk:
+    - "src/ai/embeddings.ts:7"
+  "interface: embeddedchunk":
+    - "src/ai/embeddings.ts:7"
+  embedding cache:
+    - "src/ai/embeddings.ts:11"
+  "interface: embeddingcache":
+    - "src/ai/embeddings.ts:11"
+  progress:
+    - "src/ai/embeddings.ts:46"
+    - "src/ai/embeddings.ts:52"
+  embed progress:
+    - "src/ai/embeddings.ts:46"
+  "interface: embedprogress":
+    - "src/ai/embeddings.ts:46"
+  callback:
+    - "src/ai/embeddings.ts:52"
+  progress callback:
+    - "src/ai/embeddings.ts:52"
+  "type: progresscallback":
+    - "src/ai/embeddings.ts:52"
+  batch:
+    - "src/ai/embeddings.ts:17"
+    - "src/ai/ollama.ts:76"
+  size:
+    - "src/ai/embeddings.ts:17"
+  batch size:
+    - "src/ai/embeddings.ts:17"
+  "constant: batch_size":
+    - "src/ai/embeddings.ts:17"
+  fetch:
+    - "src/ai/ollama.ts:23"
+  fetch ollama:
+    - "src/ai/ollama.ts:23"
+  "function: fetchollama":
+    - "src/ai/ollama.ts:23"
+  ping:
+    - "src/ai/ollama.ts:35"
+  "function: ping":
+    - "src/ai/ollama.ts:35"
+  list:
+    - "src/ai/ollama.ts:44"
+  models:
+    - "src/ai/ollama.ts:44"
+  list models:
+    - "src/ai/ollama.ts:44"
+  "function: listmodels":
+    - "src/ai/ollama.ts:44"
+  has:
+    - "src/ai/ollama.ts:53"
+    - "src/analysis/patterns.ts:680"
+    - "src/analysis/patterns.ts:681"
+    - "src/analysis/patterns.ts:744"
+    - "src/analysis/patterns.ts:745"
+  model:
+    - "src/ai/ollama.ts:144"
+    - "src/ai/ollama.ts:3"
+    - "src/ai/ollama.ts:53"
+  has model:
+    - "src/ai/ollama.ts:53"
+  "function: hasmodel":
+    - "src/ai/ollama.ts:53"
+  "function: embed":
+    - "src/ai/ollama.ts:58"
+  embed batch:
+    - "src/ai/ollama.ts:76"
+  "function: embedbatch":
+    - "src/ai/ollama.ts:76"
+  generate:
+    - "src/ai/ollama.ts:17"
+    - "src/ai/ollama.ts:94"
+  "function: generate":
+    - "src/ai/ollama.ts:94"
+  host:
+    - "src/ai/ollama.ts:1"
+    - "src/ai/ollama.ts:122"
+  get ollama:
+    - "src/ai/ollama.ts:122"
+  ollama host:
+    - "src/ai/ollama.ts:1"
+    - "src/ai/ollama.ts:122"
+  get ollama host:
+    - "src/ai/ollama.ts:122"
+  "function: getollamahost":
+    - "src/ai/ollama.ts:122"
+  check:
+    - "src/ai/ollama.ts:126"
+    - "src/synthesis/explainer.ts:130"
+  connection:
+    - "src/ai/ollama.ts:126"
+  check connection:
+    - "src/ai/ollama.ts:126"
+  "function: checkconnection":
+    - "src/ai/ollama.ts:126"
+  validate:
+    - "src/ai/ollama.ts:144"
+  validate model:
+    - "src/ai/ollama.ts:144"
+  "function: validatemodel":
+    - "src/ai/ollama.ts:144"
+  ollama model:
+    - "src/ai/ollama.ts:3"
+  "interface: ollamamodel":
+    - "src/ai/ollama.ts:3"
+  client:
+    - "src/ai/ollama.ts:9"
+  ollama client:
+    - "src/ai/ollama.ts:9"
+  "interface: ollamaclient":
+    - "src/ai/ollama.ts:9"
+  options:
+    - "src/ai/ollama.ts:17"
+    - "src/commands/inject.ts:8"
+    - "src/commands/scan.ts:16"
+  generate options:
+    - "src/ai/ollama.ts:17"
+  "interface: generateoptions":
+    - "src/ai/ollama.ts:17"
+  "constant: ollama_host":
+    - "src/ai/ollama.ts:1"
+  build:
+    - "src/ai/synthesizer.ts:11"
+    - "src/analysis/indexer.ts:261"
+  prompt:
+    - "src/ai/synthesizer.ts:11"
+  build prompt:
+    - "src/ai/synthesizer.ts:11"
+  "function: buildprompt":
+    - "src/ai/synthesizer.ts:11"
+  parse:
+    - "src/ai/synthesizer.ts:51"
+  response:
+    - "src/ai/synthesizer.ts:51"
+  parse response:
+    - "src/ai/synthesizer.ts:51"
+  "function: parseresponse":
+    - "src/ai/synthesizer.ts:51"
+  section:
+    - "src/ai/synthesizer.ts:53"
+  extract section:
+    - "src/ai/synthesizer.ts:53"
+  "function: extractsection":
+    - "src/ai/synthesizer.ts:53"
+  synthesize:
+    - "src/ai/synthesizer.ts:76"
+  constraints:
+    - "src/ai/synthesizer.ts:118"
+    - "src/ai/synthesizer.ts:4"
+    - "src/ai/synthesizer.ts:76"
+    - "src/synthesis/explainer.ts:167"
+    - "src/synthesis/explainer.ts:6"
+  synthesize constraints:
+    - "src/ai/synthesizer.ts:76"
+  "function: synthesizeconstraints":
+    - "src/ai/synthesizer.ts:76"
+  merge:
+    - "src/ai/synthesizer.ts:102"
+  with:
+    - "src/ai/synthesizer.ts:102"
+  heuristics:
+    - "src/ai/synthesizer.ts:102"
+  merge with:
+    - "src/ai/synthesizer.ts:102"
+  with heuristics:
+    - "src/ai/synthesizer.ts:102"
+  merge with heuristics:
+    - "src/ai/synthesizer.ts:102"
+  "function: mergewithheuristics":
+    - "src/ai/synthesizer.ts:102"
+  format:
+    - "src/ai/synthesizer.ts:118"
+    - "src/synthesis/injector.ts:4"
+  for:
+    - "src/ai/synthesizer.ts:118"
+    - "src/synthesis/injector.ts:4"
+  yaml:
+    - "src/ai/synthesizer.ts:118"
+  format constraints:
+    - "src/ai/synthesizer.ts:118"
+  constraints for:
+    - "src/ai/synthesizer.ts:118"
+  for yaml:
+    - "src/ai/synthesizer.ts:118"
+  format constraints for yaml:
+    - "src/ai/synthesizer.ts:118"
+  "function: formatconstraintsforyaml":
+    - "src/ai/synthesizer.ts:118"
+  synthesized:
+    - "src/ai/synthesizer.ts:4"
+  synthesized constraints:
+    - "src/ai/synthesizer.ts:4"
+  "interface: synthesizedconstraints":
+    - "src/ai/synthesizer.ts:4"
+  synthesizer:
+    - "src/ai/synthesizer.ts"
+  cosine:
+    - "src/ai/vectors.ts:15"
+  similarity:
+    - "src/ai/vectors.ts:15"
+    - "src/ai/vectors.ts:3"
+  cosine similarity:
+    - "src/ai/vectors.ts:15"
+  "function: cosinesimilarity":
+    - "src/ai/vectors.ts:15"
+  vector:
+    - "src/ai/vectors.ts:32"
+  mean:
+    - "src/ai/vectors.ts:32"
+  vector mean:
+    - "src/ai/vectors.ts:32"
+  "function: vectormean":
+    - "src/ai/vectors.ts:32"
+  similar:
+    - "src/ai/vectors.ts:51"
+    - "src/ai/vectors.ts:65"
+  find similar:
+    - "src/ai/vectors.ts:51"
+  "function: findsimilar":
+    - "src/ai/vectors.ts:51"
+  most:
+    - "src/ai/vectors.ts:65"
+  pairs:
+    - "src/ai/vectors.ts:65"
+  find most:
+    - "src/ai/vectors.ts:65"
+  most similar:
+    - "src/ai/vectors.ts:65"
+  similar pairs:
+    - "src/ai/vectors.ts:65"
+  find most similar pairs:
+    - "src/ai/vectors.ts:65"
+  "function: findmostsimilarpairs":
+    - "src/ai/vectors.ts:65"
+  cluster:
+    - "src/ai/vectors.ts:161"
+    - "src/ai/vectors.ts:260"
+    - "src/ai/vectors.ts:8"
+    - "src/ai/vectors.ts:88"
+  cluster chunks:
+    - "src/ai/vectors.ts:88"
+  "function: clusterchunks":
+    - "src/ai/vectors.ts:88"
+  auto:
+    - "src/ai/vectors.ts:161"
+  auto cluster:
+    - "src/ai/vectors.ts:161"
+  "function: autocluster":
+    - "src/ai/vectors.ts:161"
+  label:
+    - "src/ai/vectors.ts:172"
+  clusters:
+    - "src/ai/vectors.ts:172"
+  label clusters:
+    - "src/ai/vectors.ts:172"
+  "function: labelclusters":
+    - "src/ai/vectors.ts:172"
+  coherence:
+    - "src/ai/vectors.ts:260"
+  cluster coherence:
+    - "src/ai/vectors.ts:260"
+  "function: clustercoherence":
+    - "src/ai/vectors.ts:260"
+  similarity result:
+    - "src/ai/vectors.ts:3"
+  "interface: similarityresult":
+    - "src/ai/vectors.ts:3"
+  "interface: cluster":
+    - "src/ai/vectors.ts:8"
+  vectors:
+    - "src/ai/vectors.ts"
+  infer:
+    - "src/analysis/conventions.ts:27"
+  infer conventions:
+    - "src/analysis/conventions.ts:27"
+  "function: inferconventions":
+    - "src/analysis/conventions.ts:27"
+  responsibility:
+    - "src/analysis/conventions.ts:169"
+  "function: responsibility":
+    - "src/analysis/conventions.ts:169"
+  write:
+    - "src/analysis/conventions.ts:191"
+  context:
+    - "src/analysis/conventions.ts:191"
+    - "src/analysis/conventions.ts:21"
+    - "src/synthesis/explainer.ts:13"
+    - "src/synthesis/explainer.ts:23"
+    - "src/types/schema.ts:82"
+  write context:
+    - "src/analysis/conventions.ts:191"
+  context files:
+    - "src/analysis/conventions.ts:191"
+  write context files:
+    - "src/analysis/conventions.ts:191"
+  "function: writecontextfiles":
+    - "src/analysis/conventions.ts:191"
+  naming style:
+    - "src/analysis/conventions.ts:7"
+    - "src/analysis/patterns.ts:6"
+  "type: namingstyle":
+    - "src/analysis/conventions.ts:7"
+    - "src/analysis/patterns.ts:6"
+  input:
+    - "src/analysis/conventions.ts:9"
+  analysis input:
+    - "src/analysis/conventions.ts:9"
+  "interface: analysisinput":
+    - "src/analysis/conventions.ts:9"
+  inferred:
+    - "src/analysis/conventions.ts:21"
+  inferred context:
+    - "src/analysis/conventions.ts:21"
+  "interface: inferredcontext":
+    - "src/analysis/conventions.ts:21"
+  exclusions:
+    - "src/analysis/filesystem.ts:8"
+    - "src/types/schema.ts:70"
+  load exclusions:
+    - "src/analysis/filesystem.ts:8"
+  "function: loadexclusions":
+    - "src/analysis/filesystem.ts:8"
+  walk:
+    - "src/analysis/filesystem.ts:29"
+  directory:
+    - "src/analysis/filesystem.ts:29"
+    - "src/analysis/filesystem.ts:64"
+  walk directory:
+    - "src/analysis/filesystem.ts:29"
+  "function: walkdirectory":
+    - "src/analysis/filesystem.ts:29"
+  structure:
+    - "src/analysis/filesystem.ts:64"
+    - "src/analysis/patterns.ts:57"
+    - "src/types/schema.ts:49"
+  get directory:
+    - "src/analysis/filesystem.ts:64"
+  directory structure:
+    - "src/analysis/filesystem.ts:64"
+  get directory structure:
+    - "src/analysis/filesystem.ts:64"
+  "function: getdirectorystructure":
+    - "src/analysis/filesystem.ts:64"
+  filesystem:
+    - "src/analysis/filesystem.ts"
+  classes:
+    - "src/analysis/indexer.ts:41"
+  extract classes:
+    - "src/analysis/indexer.ts:41"
+  "function: extractclasses":
+    - "src/analysis/indexer.ts:41"
+  functions:
+    - "src/analysis/indexer.ts:94"
+  extract functions:
+    - "src/analysis/indexer.ts:94"
+  "function: extractfunctions":
+    - "src/analysis/indexer.ts:94"
+  types:
+    - "src/analysis/indexer.ts:127"
+  extract types:
+    - "src/analysis/indexer.ts:127"
+  "function: extracttypes":
+    - "src/analysis/indexer.ts:127"
+  constants:
+    - "src/analysis/indexer.ts:160"
+  extract constants:
+    - "src/analysis/indexer.ts:160"
+  "function: extractconstants":
+    - "src/analysis/indexer.ts:160"
+  to:
+    - "src/analysis/indexer.ts:188"
+  keywords:
+    - "src/analysis/indexer.ts:188"
+  to keywords:
+    - "src/analysis/indexer.ts:188"
+  "function: tokeywords":
+    - "src/analysis/indexer.ts:188"
+  group:
+    - "src/analysis/indexer.ts:218"
+  by:
+    - "src/analysis/indexer.ts:218"
+  domain:
+    - "src/analysis/indexer.ts:218"
+  group by:
+    - "src/analysis/indexer.ts:218"
+  by domain:
+    - "src/analysis/indexer.ts:218"
+  group by domain:
+    - "src/analysis/indexer.ts:218"
+  "function: groupbydomain":
+    - "src/analysis/indexer.ts:218"
+  build file:
+    - "src/analysis/indexer.ts:261"
+  file index:
+    - "src/analysis/indexer.ts:16"
+    - "src/analysis/indexer.ts:261"
+    - "src/analysis/indexer.ts:338"
+    - "src/analysis/indexer.ts:354"
+    - "src/analysis/indexer.ts:9"
+  build file index:
+    - "src/analysis/indexer.ts:261"
+  "function: buildfileindex":
+    - "src/analysis/indexer.ts:261"
+  save file:
+    - "src/analysis/indexer.ts:338"
+  save file index:
+    - "src/analysis/indexer.ts:338"
+  "function: savefileindex":
+    - "src/analysis/indexer.ts:338"
+  load file:
+    - "src/analysis/indexer.ts:354"
+  load file index:
+    - "src/analysis/indexer.ts:354"
+  "function: loadfileindex":
+    - "src/analysis/indexer.ts:354"
+  search:
+    - "src/analysis/indexer.ts:372"
+  search index:
+    - "src/analysis/indexer.ts:372"
+  "function: searchindex":
+    - "src/analysis/indexer.ts:372"
+  entry:
+    - "src/analysis/indexer.ts:9"
+    - "src/types/schema.ts:75"
+  index entry:
+    - "src/analysis/indexer.ts:9"
+  file index entry:
+    - "src/analysis/indexer.ts:9"
+  "interface: fileindexentry":
+    - "src/analysis/indexer.ts:9"
+  "interface: fileindex":
+    - "src/analysis/indexer.ts:16"
+  identifier:
+    - "src/analysis/indexer.ts:31"
+  "interface: identifier":
+    - "src/analysis/indexer.ts:31"
+  indexer:
+    - "src/analysis/indexer.ts"
+  case:
+    - "src/analysis/patterns.ts:8"
+  detect case:
+    - "src/analysis/patterns.ts:8"
+  "function: detectcase":
+    - "src/analysis/patterns.ts:8"
+  calculate:
+    - "src/analysis/patterns.ts:16"
+  confidence:
+    - "src/analysis/patterns.ts:16"
+    - "src/types/schema.ts:1"
+  calculate confidence:
+    - "src/analysis/patterns.ts:16"
+  "function: calculateconfidence":
+    - "src/analysis/patterns.ts:16"
+  convention:
+    - "src/analysis/patterns.ts:22"
+  detect naming:
+    - "src/analysis/patterns.ts:22"
+  naming convention:
+    - "src/analysis/patterns.ts:22"
+  detect naming convention:
+    - "src/analysis/patterns.ts:22"
+  "function: detectnamingconvention":
+    - "src/analysis/patterns.ts:22"
+  detect structure:
+    - "src/analysis/patterns.ts:57"
+  structure pattern:
+    - "src/analysis/patterns.ts:57"
+    - "src/types/schema.ts:49"
+  detect structure pattern:
+    - "src/analysis/patterns.ts:57"
+  "function: detectstructurepattern":
+    - "src/analysis/patterns.ts:57"
+  flutter:
+    - "src/analysis/patterns.ts:114"
+    - "src/analysis/patterns.ts:116"
+    - "src/analysis/patterns.ts:126"
+  state:
+    - "src/analysis/patterns.ts:114"
+    - "src/analysis/patterns.ts:116"
+    - "src/analysis/patterns.ts:126"
+  management:
+    - "src/analysis/patterns.ts:114"
+    - "src/analysis/patterns.ts:116"
+    - "src/analysis/patterns.ts:126"
+  detect flutter:
+    - "src/analysis/patterns.ts:126"
+  flutter state:
+    - "src/analysis/patterns.ts:114"
+    - "src/analysis/patterns.ts:116"
+    - "src/analysis/patterns.ts:126"
+  state management:
+    - "src/analysis/patterns.ts:114"
+    - "src/analysis/patterns.ts:116"
+    - "src/analysis/patterns.ts:126"
+  detect flutter state management:
+    - "src/analysis/patterns.ts:126"
+  "function: detectflutterstatemanagement":
+    - "src/analysis/patterns.ts:126"
+  abstractions:
+    - "src/analysis/patterns.ts:224"
+  detect abstractions:
+    - "src/analysis/patterns.ts:224"
+  "function: detectabstractions":
+    - "src/analysis/patterns.ts:224"
+  formatting:
+    - "src/analysis/patterns.ts:273"
+    - "src/analysis/patterns.ts:293"
+    - "src/types/schema.ts:25"
+  detect formatting:
+    - "src/analysis/patterns.ts:293"
+  "function: detectformatting":
+    - "src/analysis/patterns.ts:293"
+  import:
+    - "src/analysis/patterns.ts:279"
+    - "src/analysis/patterns.ts:416"
+    - "src/types/schema.ts:31"
+  detect import:
+    - "src/analysis/patterns.ts:416"
+  import style:
+    - "src/analysis/patterns.ts:279"
+    - "src/analysis/patterns.ts:416"
+  detect import style:
+    - "src/analysis/patterns.ts:416"
+  "function: detectimportstyle":
+    - "src/analysis/patterns.ts:416"
+  detect code:
+    - "src/analysis/patterns.ts:566"
+  code naming:
+    - "src/analysis/patterns.ts:287"
+    - "src/analysis/patterns.ts:566"
+  detect code naming:
+    - "src/analysis/patterns.ts:566"
+  "function: detectcodenaming":
+    - "src/analysis/patterns.ts:566"
+  majority:
+    - "src/analysis/patterns.ts:638"
+  detect majority:
+    - "src/analysis/patterns.ts:638"
+  majority style:
+    - "src/analysis/patterns.ts:638"
+  detect majority style:
+    - "src/analysis/patterns.ts:638"
+  "function: detectmajoritystyle":
+    - "src/analysis/patterns.ts:638"
+  monorepo:
+    - "src/analysis/patterns.ts:679"
+  detect monorepo:
+    - "src/analysis/patterns.ts:679"
+  "function: detectmonorepo":
+    - "src/analysis/patterns.ts:679"
+  has file:
+    - "src/analysis/patterns.ts:680"
+    - "src/analysis/patterns.ts:744"
+  "function: hasfile":
+    - "src/analysis/patterns.ts:680"
+    - "src/analysis/patterns.ts:744"
+  dir:
+    - "src/analysis/patterns.ts:681"
+    - "src/commands/explain.ts:5"
+    - "src/commands/init.ts:6"
+    - "src/commands/inject.ts:6"
+    - "src/commands/scan.ts:14"
+  has dir:
+    - "src/analysis/patterns.ts:681"
+  "function: hasdir":
+    - "src/analysis/patterns.ts:681"
+  language:
+    - "src/analysis/patterns.ts:737"
+    - "src/analysis/patterns.ts:743"
+  framework:
+    - "src/analysis/patterns.ts:737"
+    - "src/analysis/patterns.ts:743"
+  detect language:
+    - "src/analysis/patterns.ts:743"
+  language framework:
+    - "src/analysis/patterns.ts:737"
+    - "src/analysis/patterns.ts:743"
+  detect language framework:
+    - "src/analysis/patterns.ts:743"
+  "function: detectlanguageframework":
+    - "src/analysis/patterns.ts:743"
+  any:
+    - "src/analysis/patterns.ts:745"
+  has any:
+    - "src/analysis/patterns.ts:745"
+  any file:
+    - "src/analysis/patterns.ts:745"
+  has any file:
+    - "src/analysis/patterns.ts:745"
+  "function: hasanyfile":
+    - "src/analysis/patterns.ts:745"
+  abstraction:
+    - "src/analysis/patterns.ts:107"
+  "interface: abstraction":
+    - "src/analysis/patterns.ts:107"
+  flutter state management:
+    - "src/analysis/patterns.ts:114"
+  "type: flutterstatemanagement":
+    - "src/analysis/patterns.ts:114"
+  management result:
+    - "src/analysis/patterns.ts:116"
+  flutter state management result:
+    - "src/analysis/patterns.ts:116"
+  "interface: flutterstatemanagementresult":
+    - "src/analysis/patterns.ts:116"
+  formatting style:
+    - "src/analysis/patterns.ts:273"
+  "interface: formattingstyle":
+    - "src/analysis/patterns.ts:273"
+  "interface: importstyle":
+    - "src/analysis/patterns.ts:279"
+  "interface: codenaming":
+    - "src/analysis/patterns.ts:287"
+  "interface: languageframework":
+    - "src/analysis/patterns.ts:737"
+  patterns:
+    - "src/analysis/patterns.ts"
+    - "src/synthesis/explainer.ts:157"
+  "function: explain":
+    - "src/commands/explain.ts:7"
+  ctx:
+    - "src/commands/explain.ts:5"
+    - "src/commands/init.ts:6"
+    - "src/commands/inject.ts:6"
+    - "src/commands/scan.ts:14"
+  ctx dir:
+    - "src/commands/explain.ts:5"
+    - "src/commands/init.ts:6"
+    - "src/commands/inject.ts:6"
+    - "src/commands/scan.ts:14"
+  "constant: ctx_dir":
+    - "src/commands/explain.ts:5"
+    - "src/commands/init.ts:6"
+    - "src/commands/inject.ts:6"
+    - "src/commands/scan.ts:14"
+  init:
+    - "src/commands/init.ts"
+    - "src/commands/init.ts:78"
+  "function: init":
+    - "src/commands/init.ts:78"
+  inject:
+    - "src/commands/inject.ts"
+    - "src/commands/inject.ts:12"
+    - "src/commands/inject.ts:8"
+  "function: inject":
+    - "src/commands/inject.ts:12"
+  inject options:
+    - "src/commands/inject.ts:8"
+  "interface: injectoptions":
+    - "src/commands/inject.ts:8"
+  scan:
+    - "src/commands/scan.ts"
+    - "src/commands/scan.ts:16"
+    - "src/commands/scan.ts:21"
+  "function: scan":
+    - "src/commands/scan.ts:21"
+  count:
+    - "src/commands/scan.ts:180"
+  findings:
+    - "src/commands/scan.ts:180"
+  count findings:
+    - "src/commands/scan.ts:180"
+  "function: countfindings":
+    - "src/commands/scan.ts:180"
+  conf:
+    - "src/commands/scan.ts:183"
+  "function: conf":
+    - "src/commands/scan.ts:183"
+  scan options:
+    - "src/commands/scan.ts:16"
+  "interface: scanoptions":
+    - "src/commands/scan.ts:16"
+  load context:
+    - "src/synthesis/explainer.ts:23"
+  "function: loadcontext":
+    - "src/synthesis/explainer.ts:23"
+  architecture:
+    - "src/synthesis/explainer.ts:52"
+    - "src/types/schema.ts:58"
+  explain architecture:
+    - "src/synthesis/explainer.ts:52"
+  "function: explainarchitecture":
+    - "src/synthesis/explainer.ts:52"
+  explain conventions:
+    - "src/synthesis/explainer.ts:85"
+  "function: explainconventions":
+    - "src/synthesis/explainer.ts:85"
+  uncertain:
+    - "src/synthesis/explainer.ts:127"
+    - "src/synthesis/explainer.ts:130"
+  explain uncertain:
+    - "src/synthesis/explainer.ts:127"
+  "function: explainuncertain":
+    - "src/synthesis/explainer.ts:127"
+  check uncertain:
+    - "src/synthesis/explainer.ts:130"
+  "function: checkuncertain":
+    - "src/synthesis/explainer.ts:130"
+  value:
+    - "src/synthesis/explainer.ts:134"
+  "function: value":
+    - "src/synthesis/explainer.ts:134"
+  capitalize:
+    - "src/synthesis/explainer.ts:153"
+  "function: capitalize":
+    - "src/synthesis/explainer.ts:153"
+  explain semantic:
+    - "src/synthesis/explainer.ts:157"
+  semantic patterns:
+    - "src/synthesis/explainer.ts:157"
+  explain semantic patterns:
+    - "src/synthesis/explainer.ts:157"
+  "function: explainsemanticpatterns":
+    - "src/synthesis/explainer.ts:157"
+  ai:
+    - "src/synthesis/explainer.ts:167"
+    - "src/synthesis/explainer.ts:6"
+    - "src/synthesis/injector.ts:4"
+  explain ai:
+    - "src/synthesis/explainer.ts:167"
+  ai constraints:
+    - "src/synthesis/explainer.ts:167"
+    - "src/synthesis/explainer.ts:6"
+  explain ai constraints:
+    - "src/synthesis/explainer.ts:167"
+  "function: explainaiconstraints":
+    - "src/synthesis/explainer.ts:167"
+  "interface: aiconstraints":
+    - "src/synthesis/explainer.ts:6"
+  extended:
+    - "src/synthesis/explainer.ts:13"
+  extended context:
+    - "src/synthesis/explainer.ts:13"
+  "interface: extendedcontext":
+    - "src/synthesis/explainer.ts:13"
+  explainer:
+    - "src/synthesis/explainer.ts"
+  format for:
+    - "src/synthesis/injector.ts:4"
+  for ai:
+    - "src/synthesis/injector.ts:4"
+  format for ai:
+    - "src/synthesis/injector.ts:4"
+  "function: formatforai":
+    - "src/synthesis/injector.ts:4"
+  task:
+    - "src/synthesis/injector.ts:77"
+  guidance:
+    - "src/synthesis/injector.ts:77"
+  get task:
+    - "src/synthesis/injector.ts:77"
+  task guidance:
+    - "src/synthesis/injector.ts:77"
+  get task guidance:
+    - "src/synthesis/injector.ts:77"
+  "function: gettaskguidance":
+    - "src/synthesis/injector.ts:77"
+  injector:
+    - "src/synthesis/injector.ts"
+  "type: confidence":
+    - "src/types/schema.ts:1"
+  finding:
+    - "src/types/schema.ts:3"
+  "interface: finding":
+    - "src/types/schema.ts:3"
+  manifest:
+    - "src/types/schema.ts:9"
+  "interface: manifest":
+    - "src/types/schema.ts:9"
+  naming conventions:
+    - "src/types/schema.ts:19"
+  "interface: namingconventions":
+    - "src/types/schema.ts:19"
+  formatting conventions:
+    - "src/types/schema.ts:25"
+  "interface: formattingconventions":
+    - "src/types/schema.ts:25"
+  import conventions:
+    - "src/types/schema.ts:31"
+  "interface: importconventions":
+    - "src/types/schema.ts:31"
+  "interface: conventions":
+    - "src/types/schema.ts:39"
+  "type: structurepattern":
+    - "src/types/schema.ts:49"
+  boundary:
+    - "src/types/schema.ts:51"
+  "interface: boundary":
+    - "src/types/schema.ts:51"
+  "interface: architecture":
+    - "src/types/schema.ts:58"
+  "interface: exclusions":
+    - "src/types/schema.ts:70"
+  file entry:
+    - "src/types/schema.ts:75"
+  "interface: fileentry":
+    - "src/types/schema.ts:75"
+  full:
+    - "src/types/schema.ts:82"
+  full context:
+    - "src/types/schema.ts:82"
+  "interface: fullcontext":
+    - "src/types/schema.ts:82"
+  schema:
+    - "src/types/schema.ts"
+summary:
+  total_files: 18
+  total_keywords: 429
+  domains_count: 5

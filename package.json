@@ -1,6 +1,6 @@
 {
   "name": "ctx",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Extract coding patterns from codebases and synthesize them into AI-injectable context",
   "main": "dist/index.js",
   "bin": {
@@ -16,9 +16,15 @@
     "context",
     "ai",
     "patterns",
-    "conventions"
+    "conventions",
+    "flutter",
+    "dart",
+    "typescript"
   ],
-  "author": "",
+  "author": {
+    "name": "qazaqninja",
+    "url": "https://qazaqninja.dev/"
+  },
   "license": "MIT",
   "dependencies": {
     "commander": "^12.1.0",

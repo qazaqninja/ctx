@@ -47,6 +47,7 @@ const defaultArchitecture: Architecture = {
 
 const defaultExclusions: Exclusions = {
   paths: [
+    // JavaScript/TypeScript
     'node_modules',
     'dist',
     'build',
@@ -58,6 +59,15 @@ const defaultExclusions: Exclusions = {
     'coverage',
     '.next',
     '.nuxt',
+    // Dart/Flutter
+    '.dart_tool',
+    '.flutter-plugins',
+    '.flutter-plugins-dependencies',
+    '*.g.dart',
+    '*.freezed.dart',
+    '*.gr.dart',
+    '*.config.dart',
+    '*.mocks.dart',
   ],
   ignore_patterns: [
     'generated files',

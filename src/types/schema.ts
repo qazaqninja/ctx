@@ -31,6 +31,8 @@ export interface FormattingConventions {
 export interface ImportConventions {
   style?: Finding<string>;
   order?: Finding<string[]>;
+  builtinPrefix?: Finding<boolean>;
+  /** @deprecated Use builtinPrefix instead */
   nodePrefix?: Finding<boolean>;
 }
 
@@ -53,6 +55,31 @@ export interface Boundary {
   confidence: Confidence;
 }
 
+export interface DependencyInfo {
+  name: string;
+  version?: string;
+  purpose: string;
+  confidence: Confidence;
+}
+
+export interface DependencyCategories {
+  stateManagement?: string[];
+  routing?: string[];
+  database?: string[];
+  networking?: string[];
+  codeGeneration?: string[];
+  dependencyInjection?: string[];
+  testing?: string[];
+  firebase?: string[];
+  utilities?: string[];
+}
+
+export interface DependencyContext {
+  dependencies: DependencyInfo[];
+  devDependencies: DependencyInfo[];
+  categories: DependencyCategories;
+}
+
 export interface Architecture {
   structure?: Finding<StructurePattern>;
   boundaries?: Boundary[];
@@ -60,9 +87,11 @@ export interface Architecture {
     persistence?: Finding<string>;
     error_handling?: Finding<string>;
     dependency_injection?: Finding<string>;
+    state_management?: Finding<string>;
   };
   data_flow?: Finding<string>;
   isMonorepo?: Finding<boolean>;
+  dependencies?: DependencyContext;
 }
 
 export interface Exclusions {
